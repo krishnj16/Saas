@@ -28,4 +28,19 @@ A Node.js + Express + PostgreSQL + Prisma project for building a SaaS-style vuln
   - `POST /users` → add a new user
 - Verified DB operations with **Prisma Studio**
 
+##  Day 4 — Signup Endpoint (POST /auth/signup)
+
+### What I learned
+- Why storing plain passwords is unsafe.
+- Difference between hashing and encryption (hashing is one-way).
+- How bcrypt adds salt to strengthen password security.
+- Implemented proper error handling with correct HTTP status codes.
+
+### Deliverable
+- **Route:** `POST /auth/signup`
+- **Request Body:**
+  ```json
+  { "email": "user@mail.com", "password": "123456" }
+
+
 ---
