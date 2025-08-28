@@ -1,4 +1,31 @@
-Keeping daily progress
-Day1: basic express server with /health
-Day2: helmet, cors, json parsing, routes folder, 404/error handlers
-Day3: Database, Prisma
+# SaaS Vulnerability Toolkit
+
+A Node.js + Express + PostgreSQL + Prisma project for building a SaaS-style vulnerability scanner.
+
+---
+
+### **Day 1: Basic Server Setup**
+- Setup a simple Express server
+- Added a `/health` endpoint to test server status
+
+### **Day 2: Middleware & Structure**
+- Added security & core middleware:
+  - `helmet` → secure HTTP headers
+  - `cors` → frontend–backend communication
+  - `express.json()` → parse JSON requests
+- Organized project structure:
+  - Moved routes to `routes/` folder
+  - Added **404 handler** (Not Found)
+  - Added **error handler** (catch errors consistently)
+
+### **Day 3: Database Integration**
+- Setup **PostgreSQL** with **Prisma ORM**
+- Added `.env` config for DB connection
+- Defined `User` model in Prisma schema
+- Ran migrations → created `User` table in Postgres
+- Added `userRoutes`:
+  - `GET /users` → list all users
+  - `POST /users` → add a new user
+- Verified DB operations with **Prisma Studio**
+
+---
