@@ -10,6 +10,8 @@ const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
 
+
+
 /** Core middlewares (order matters) */
 app.use(helmet()); // security headers
 app.use(cors({ origin: corsOrigin, credentials: true })); // allow frontend
