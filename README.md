@@ -42,5 +42,16 @@ A Node.js + Express + PostgreSQL + Prisma project for building a SaaS-style vuln
   ```json
   { "email": "user@mail.com", "password": "123456" }
 
+##  Day 5 Progress
+
+### Implemented
+- **Signup API** (`POST /auth/signup`)
+  - Validates input, hashes password with bcrypt, saves user via Prisma.
+- **Login API** (`POST /auth/login`)
+  - Verifies user, checks password, returns JWT token.
+- **Security**
+  - Rate limiter on login (5 tries/15 mins).
+  - Central error handling.
+
 
 ---
