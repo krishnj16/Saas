@@ -2,7 +2,7 @@ const express = require("express");
 const { prisma } = require("../configs/prisma");
 const router = express.Router();
 
-// GET /users -> list all users
+
 router.get("/", async (req, res, next) => {
   try {
     const users = await prisma.user.findMany({
@@ -15,7 +15,7 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-// POST /users -> create new user
+
 router.post("/", async (req, res, next) => {
   try {
     const { email, name, password } = req.body;
@@ -27,7 +27,7 @@ router.post("/", async (req, res, next) => {
       data: {
         email,
         name: name || null,
-        passwordHash: password, // ⚠️ later we will hash this
+        passwordHash: password, 
       },
       select: { id: true, email: true, name: true, createdAt: true },
     });
