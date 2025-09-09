@@ -1,10 +1,10 @@
-
 const bcrypt = require('bcryptjs');
-
 const { prisma } = require('../configs/prisma');
 const tokenUtil = require('../utils/tokenUtil');
 
 const SALT_ROUNDS = Number(process.env.SALT_ROUNDS) || 10;
+
+// Pick the correct token creation function
 const createToken =
   (tokenUtil && typeof tokenUtil.signToken === 'function' && tokenUtil.signToken) ||
   (tokenUtil && typeof tokenUtil.generateToken === 'function' && tokenUtil.generateToken) ||
@@ -16,6 +16,7 @@ if (!createToken) {
     tokenUtil
   );
 }
+
 const authError = (res) => res.status(401).json({ error: 'Invalid email or password' });
 
 exports.signup = async (req, res, next) => {
@@ -33,10 +34,11 @@ exports.signup = async (req, res, next) => {
     if (existing) {
       return res.status(409).json({ error: 'User already exists' });
     }
+
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
 
     const user = await prisma.user.create({
-      data: { email, passwordHash },
+      data: { email, passwordHash, role: 'user' },
       select: { id: true, email: true, role: true, createdAt: true },
     });
 
@@ -52,6 +54,7 @@ exports.signup = async (req, res, next) => {
 exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body || {};
+
     if (!email || typeof email !== 'string' || !email.includes('@')) {
       return res.status(400).json({ error: 'Invalid or missing email' });
     }
@@ -68,7 +71,9 @@ exports.login = async (req, res, next) => {
 
     if (!user.passwordHash) {
       console.error('Login failed: user has no passwordHash field', { user });
-      return res.status(500).json({ error: 'Server misconfigured: missing password hash' });
+      return res
+        .status(500)
+        .json({ error: 'Server misconfigured: missing password hash' });
     }
 
     const match = await bcrypt.compare(password, user.passwordHash);
@@ -76,7 +81,9 @@ exports.login = async (req, res, next) => {
 
     if (!createToken) {
       console.error('Token creation function is missing on tokenUtil:', tokenUtil);
-      return res.status(500).json({ error: 'Token generation unavailable. See server logs.' });
+      return res
+        .status(500)
+        .json({ error: 'Token generation unavailable. See server logs.' });
     }
 
     const payload = { userId: user.id, role: user.role || 'user' };

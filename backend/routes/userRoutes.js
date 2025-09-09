@@ -3,6 +3,10 @@ const { prisma } = require("../configs/prisma");
 const { authenticate, authorizeRoles } = require("../middleware/auth"); 
 const router = express.Router();
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/main
 router.get("/", async (req, res, next) => {
   try {
     const users = await prisma.user.findMany({
@@ -15,6 +19,10 @@ router.get("/", async (req, res, next) => {
   }
 });
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/main
 router.post("/", async (req, res, next) => {
   try {
     const { email, name, password } = req.body;

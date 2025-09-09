@@ -21,6 +21,14 @@ app.use(helmet());
 app.use(cors({ origin: corsOrigin, credentials: true }));
 app.use(express.json());
 
+<<<<<<< HEAD
+=======
+
+app.use(helmet());
+app.use(cors({ origin: corsOrigin, credentials: true }));
+app.use(express.json());
+
+>>>>>>> origin/main
 app.use("/", routes);
 app.use(notFound);
 app.use(errorHandler);
