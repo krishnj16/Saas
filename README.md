@@ -52,6 +52,17 @@ A Node.js + Express + PostgreSQL + Prisma project for building a SaaS-style vuln
 - **Security**
   - Rate limiter on login (5 tries/15 mins).
   - Central error handling.
+  - 
+ ## Day 6 Progress
+
+### Implemented
+- **JWT Middleware**
+  - Verifies `Authorization: Bearer <token>` header.
+  - Blocks access if token is missing/invalid.
+- **Protected Routes**
+  - Added `/user/me` → returns logged-in user details.
+- **Role Support**
+  - Tokens include user role (`user` / `admin`) for role-based access (future use).
 
 
 ---
