@@ -9,9 +9,13 @@ const notFound = require("./middleware/notFound");
 const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+const authRoutes = require('./routes/auth');
+const userRoutes = require('./routes/user');
 
-
-
+app.use('/auth', authRoutes);
+app.use('/user', userRoutes);
 
 app.use(helmet());
 app.use(cors({ origin: corsOrigin, credentials: true }));

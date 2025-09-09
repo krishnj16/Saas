@@ -1,5 +1,6 @@
 const express = require("express");
 const { prisma } = require("../configs/prisma");
+const { authenticate, authorizeRoles } = require("../middleware/auth"); 
 const router = express.Router();
 
 router.get("/", async (req, res, next) => {
@@ -37,6 +38,13 @@ router.post("/", async (req, res, next) => {
     }
     next(err);
   }
+});
+router.get("/me", authenticate, (req, res) => {
+  res.json({ user: req.user });
+});
+
+router.get("/admin-only", authenticate, authorizeRoles("admin"), (req, res) => {
+  res.json({ secret: "admin data" });
 });
 
 module.exports = router;

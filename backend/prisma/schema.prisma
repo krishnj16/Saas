@@ -15,7 +15,7 @@ datasource db {
 model User {
   id           String   @id @default(uuid())
   email        String   @unique
-  passwordHash String
+  passwordHash String   @map("password_hash")
   role         String   @default("user")
   createdAt    DateTime @default(now())
 }
