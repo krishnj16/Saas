@@ -64,5 +64,18 @@ A Node.js + Express + PostgreSQL + Prisma project for building a SaaS-style vuln
 - **Role Support**
   - Tokens include user role (`user` / `admin`) for role-based access (future use).
 
+ ## Day 7 Progress
 
+### Implemented
+- **User Management API**
+  - `GET /users` → fetch all users (id, email, name, createdAt).
+  - Results sorted by user ID in ascending order.
+
+- **Prisma Integration**
+  - Queried users with `findMany`.
+  - Returned clean JSON response.
+
+- **Error Handling**
+  - Used try/catch in routes.
+  - Forwarded errors to central error handler middleware.
 ---
