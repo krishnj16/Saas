@@ -34,13 +34,29 @@ A Node.js + Express + PostgreSQL + Prisma project for building a SaaS-style vuln
 
 ---
 
+<<<<<<< HEAD
 ### **Day 4: Signup Endpoint (POST /auth/signup)**
 - Learned why storing plain passwords is unsafe
 - Understood difference between **hashing** (one-way) and **encryption** (two-way)
 - Used **bcrypt** for hashing with salt
 - Added proper error handling with correct HTTP status codes
 - **Deliverable:** working `POST /auth/signup` route
+=======
+ ## Day 7 Progress
+>>>>>>> 90fc1d4 (Update README.md)
 
+### Implemented
+- **User Management API**
+  - `GET /users` → fetch all users (id, email, name, createdAt).
+  - Results sorted by user ID in ascending order.
+
+- **Prisma Integration**
+  - Queried users with `findMany`.
+  - Returned clean JSON response.
+
+- **Error Handling**
+  - Used try/catch in routes.
+  - Forwarded errors to central error handler middleware.
 ---
 
 ### **Day 5: Authentication (Signup & Login)**
