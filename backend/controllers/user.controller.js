@@ -1,113 +1,81 @@
-// const bcrypt = require("bcrypt");
-// const { prisma } = require("../configs/prisma"); 
+const bcrypt = require('bcryptjs');
+const userRepo = require('../repositories/userRepository');
 
-// async function updateMe(req, res) {
-//   try {
-//     const userId = req.user.id;
-//     const { email, password } = req.body;
-
-//     const data = {};
-//     if (email) data.email = email;
-
-//     if (password) {
-//       const saltRounds = 10;
-//       data.passwordHash = await bcrypt.hash(password, saltRounds);
-//     }
-
-//     if (Object.keys(data).length === 0) {
-//       return res.status(400).json({ message: "Nothing to update" });
-//     }
-
-//     const updated = await prisma.user.update({
-//       where: { id: userId },
-//       data,
-//       select: { id: true, email: true, role: true, createdAt: true },
-//     });
-
-//     res.json({ user: updated });
-//   } catch (err) {
-//     console.error("updateMe error:", err);
-//     if (err.code === "P2002" && err.meta?.target?.includes("email")) {
-//       return res.status(400).json({ message: "Email already in use" });
-//     }
-//     res.status(500).json({ message: "Server error" });
-//   }
-// }
-
-// async function getAllUsers(req, res) {
-//   try {
-//     if (req.user.role !== "admin") {
-//       return res.status(403).json({ message: "Forbidden: admin only" });
-//     }
-
-//     const users = await prisma.user.findMany({
-//       select: { id: true, email: true, role: true, createdAt: true },
-//       orderBy: { createdAt: "asc" },
-//     });
-
-//     res.json({ users });
-//   } catch (err) {
-//     console.error("getAllUsers error:", err);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// }
-
-// module.exports = { updateMe, getAllUsers };
-// controllers/user.controller.js
-const bcrypt = require("bcrypt");
-const { prisma } = require("../configs/prisma");
-
-// PATCH /users/me
-async function updateMe(req, res) {
+exports.getAllUsers = async (req, res, next) => {
   try {
-    const userId = req.user.id;
+    const users = await userRepo.getAll();
+    const normalized = users.map(u => ({
+      id: u.id,
+      email: u.email,
+      role: u.role,
+      createdAt: u.createdAt
+    }));
+    res.json({ users: normalized });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getUserById = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const user = await userRepo.findById(id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    res.json({
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        createdAt: user.createdAt
+      }
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.updateMe = async (req, res, next) => {
+  try {
+    const userId = req.user && req.user.id;
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+
     const { email, password } = req.body;
+    const fields = {};
 
-    const data = {};
-    if (email) data.email = email;
-
+    if (email) fields.email = email;
     if (password) {
-      const saltRounds = 10;
-      data.passwordHash = await bcrypt.hash(password, saltRounds);
+      const hash = await bcrypt.hash(password, 10);
+      fields.password_hash = hash;
     }
 
-    if (Object.keys(data).length === 0) {
-      return res.status(400).json({ message: "Nothing to update" });
+    if (Object.keys(fields).length === 0) {
+      return res.status(400).json({ error: 'No updatable fields provided' });
     }
+    if (fields.role) delete fields.role;
 
-    const updated = await prisma.user.update({
-      where: { id: userId },
-      data,
-      select: { id: true, email: true,role: true, createdAt: true },
+    const updated = await userRepo.updateUser(userId, fields);
+    if (!updated) return res.status(404).json({ error: 'User not found' });
+
+    res.json({
+      user: {
+        id: updated.id,
+        email: updated.email,
+        role: updated.role,
+        createdAt: updated.createdAt
+      }
     });
-
-    return res.json({ user: updated });
   } catch (err) {
-    console.error("updateMe error:", err);
-    if (err.code === "P2002" && err.meta?.target?.includes("email")) {
-      return res.status(400).json({ message: "Email already in use" });
-    }
-    return res.status(500).json({ message: "Server error" });
+    if (err && err.code === '23505') return res.status(409).json({ error: 'Email already exists' });
+    next(err);
   }
-}
-
-// GET /users or /users/all (admin only)
-async function getAllUsers(req, res) {
+};
+exports.deleteUser = async (req, res, next) => {
   try {
-    if (!req.user || req.user.role !== "admin") {
-      return res.status(403).json({ message: "Forbidden: admin only" });
-    }
-
-    const users = await prisma.user.findMany({
-      select: { id: true, email: true,role: true, createdAt: true },
-      orderBy: { createdAt: "asc" },
-    });
-
-    return res.json({ users });
+    const id = req.params.id;
+    await userRepo.deleteUser(id);
+    res.status(204).send();
   } catch (err) {
-    console.error("getAllUsers error:", err);
-    return res.status(500).json({ message: "Server error" });
+    next(err);
   }
-}
-
-module.exports = { updateMe, getAllUsers };
+};

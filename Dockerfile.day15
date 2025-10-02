@@ -1,0 +1,15 @@
+# Dockerfile.day15  (repo root)
+FROM node:18-alpine
+
+WORKDIR /app
+COPY backend/package.json backend/package-lock.json* ./
+
+COPY backend/tools ./tools
+COPY backend/tests ./tests
+COPY backend/index.js ./index.js
+COPY backend/utils ./utils
+COPY backend/workers ./workers
+
+RUN npm ci --production=false || true
+
+CMD ["sh", "-c", "npm run test:day15"]

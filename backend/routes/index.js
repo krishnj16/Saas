@@ -11,4 +11,12 @@ router.get("/health", (req, res) => {
 const userRoutes = require("./userRoutes");
 router.use("/users", userRoutes);
 
+const websiteRoutes = require("./website.routes");
+router.use("/websites", websiteRoutes);
+
 module.exports = router;
+
+
+
+
+

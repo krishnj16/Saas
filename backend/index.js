@@ -1,4 +1,6 @@
 require("dotenv").config();
+console.log('ENV JWT_SECRET (server) =', process.env.JWT_SECRET || '(not set)');
+
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
@@ -7,6 +9,7 @@ const { env, port, corsOrigin } = require("./configs/env");
 const routes = require("./routes"); 
 const notFound = require("./middleware/notFound");
 const errorHandler = require("./middleware/errorHandler");
+const websitesRouter = require("./routes/websites");
 
 const app = express();
 
@@ -14,7 +17,19 @@ app.use(helmet());
 app.use(cors({ origin: corsOrigin, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.post('/__test_body', (req, res) => {
+  res.json({
+    ok: true,
+    body: req.body,
+    headers: {
+      authorization: req.headers.authorization || null,
+      'content-type': req.headers['content-type'] || null
+    }
+  });
+});
+
 app.use("/", routes);
+app.use("/websites", websitesRouter);
 
 (function safeListRoutes(a) {
   if (!a || !a._router || !Array.isArray(a._router.stack)) {
