@@ -1,47 +1,32 @@
-require('dotenv').config();
 const jwt = require('jsonwebtoken');
-const authenticate = (req, res, next) => {
+
+function authenticate(req, res, next) {
   try {
-    const auth = req.headers.authorization || req.headers.Authorization;
-    if (!auth) return res.status(401).json({ message: 'Authorization header missing' });
+    const cookieToken = req.cookies && req.cookies.access_token;
+    const authHeader = req.headers.authorization;
+    const bearerToken = authHeader && authHeader.startsWith('Bearer ')
+      ? authHeader.split(' ')[1]
+      : null;
 
-    const parts = auth.split(' ');
-    if (parts.length !== 2 || parts[0] !== 'Bearer') {
-      return res.status(401).json({ message: 'Authorization format must be: Bearer <token>' });
-    }
+    const token = cookieToken || bearerToken;
+    if (!token) return res.status(401).json({ error: 'missing_token' });
 
-    const token = parts[1].trim();
-    if (!token) return res.status(401).json({ message: 'Token missing' });
+    const secret = process.env.ACCESS_TOKEN_SECRET || process.env.JWT_SECRET || 'dev-secret';
+    const payload = jwt.verify(token, secret);
 
-    const secret = process.env.JWT_SECRET || 'dev-secret';
-    try {
-      const payload = jwt.verify(token, secret);
-      req.user = { id: payload.id, email: payload.email, role: payload.role };
-      return next();
-    } catch (err) {
-      console.error('auth error:', err && err.message ? err.message : err);
-      return res.status(401).json({ message: 'Token not valid' });
-    }
-  } catch (err) {
-    console.error('auth middleware failed:', err && err.stack ? err.stack : err);
-    return res.status(500).json({ message: 'Internal auth error' });
+    req.user = { id: payload.uid, role: payload.role || 'user' };
+    next();
+  } catch {
+    return res.status(401).json({ error: 'invalid_token' });
   }
-};
+}
 
-function authorizeRoles(...allowedRoles) {
+function authorizeRoles(...allowed) {
   return (req, res, next) => {
-    try {
-      if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
-      const userRole = req.user.role || 'user';
-      if (!allowedRoles.includes(userRole)) {
-        return res.status(403).json({ message: 'Forbidden' });
-      }
-
-      return next();
-    } catch (err) {
-      console.error('authorizeRoles error:', err && err.stack ? err.stack : err);
-      return res.status(500).json({ message: 'Internal error' });
+    if (!req.user || !allowed.includes(req.user.role)) {
+      return res.status(403).json({ error: 'forbidden' });
     }
+    next();
   };
 }
 

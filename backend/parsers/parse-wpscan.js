@@ -1,117 +1,72 @@
-const fs = require('fs').promises;
-const { Client } = require('pg');
+const { mapSeverity, ensureString } = require('./utils');
 
-module.exports = async function parseWpscan(jsonPath, opts = {}) {
-  const verified = !!opts.verifiedByWpvulndb;
-  const raw = await fs.readFile(jsonPath, 'utf8');
-  let data;
-  try {
-    data = JSON.parse(raw);
-  } catch (e) {
-    console.error('Failed to parse JSON:', e);
-    throw e;
-  }
-  if (data.scan_aborted) {
-    console.warn('WPScan aborted:', data.scan_aborted);
-    return;
+function parseWpscan(json) {
+  if (!json || typeof json !== 'object') return [];
+
+  const results = [];
+
+  if (Array.isArray(json.vulnerabilities)) {
+    json.vulnerabilities.forEach(v => results.push(mapWpscanVuln(v)));
   }
 
-  const findings = [];
-  if (data.plugins && typeof data.plugins === 'object') {
-    for (const [pluginName, plugin] of Object.entries(data.plugins)) {
-      if (plugin.vulnerabilities && Array.isArray(plugin.vulnerabilities)) {
-        for (const v of plugin.vulnerabilities) {
-          findings.push({
-            scanner: 'wpscan',
-            asset_type: 'plugin',
-            asset_name: pluginName,
-            title: v.title || v.name || v.slug || 'wp-plugin-vuln',
-            description: v.description || null,
-            references: v.references || {},
-            severity: v.severity || null,
-            url: data.target_url || null,
-            evidence: v,
-            verified_by_wpvulndb: verified
-          });
-        }
+  if (json.plugins && typeof json.plugins === 'object') {
+    Object.entries(json.plugins).forEach(([pluginName, pluginData]) => {
+      const vulns = pluginData.vulnerabilities || pluginData.vuln || [];
+      if (Array.isArray(vulns)) {
+        vulns.forEach(v => {
+          results.push(mapWpscanVuln(Object.assign({}, v, { __context: { plugin: pluginName, version: pluginData.version } })));
+        });
       }
-    }
+    });
   }
 
-  if (data.themes && typeof data.themes === 'object') {
-    for (const [themeName, theme] of Object.entries(data.themes)) {
-      if (theme.vulnerabilities && Array.isArray(theme.vulnerabilities)) {
-        for (const v of theme.vulnerabilities) {
-          findings.push({
-            scanner: 'wpscan',
-            asset_type: 'theme',
-            asset_name: themeName,
-            title: v.title || 'wp-theme-vuln',
-            description: v.description || null,
-            references: v.references || {},
-            severity: v.severity || null,
-            url: data.target_url || null,
-            evidence: v,
-            verified_by_wpvulndb: verified
-          });
-        }
+  if (json.themes && typeof json.themes === 'object') {
+    Object.entries(json.themes).forEach(([themeName, themeData]) => {
+      const vulns = themeData.vulnerabilities || [];
+      if (Array.isArray(vulns)) {
+        vulns.forEach(v => {
+          results.push(mapWpscanVuln(Object.assign({}, v, { __context: { theme: themeName, version: themeData.version } })));
+        });
       }
-    }
-  }
-  if (data.core && data.core.vulnerabilities && Array.isArray(data.core.vulnerabilities)) {
-    for (const v of data.core.vulnerabilities) {
-      findings.push({
-        scanner: 'wpscan',
-        asset_type: 'core',
-        asset_name: (data.core && data.core.version) || 'wordpress-core',
-        title: v.title || 'wp-core-vuln',
-        description: v.description || null,
-        references: v.references || {},
-        severity: v.severity || null,
-        url: data.target_url || null,
-        evidence: v,
-        verified_by_wpvulndb: verified
-      });
-    }
+    });
   }
 
-  if (findings.length === 0) {
-    console.log('No findings found in output.');
-    return;
+  if (Array.isArray(json.found_vulnerabilities)) {
+    json.found_vulnerabilities.forEach(v => results.push(mapWpscanVuln(v)));
   }
-  const client = new Client({
-    host: process.env.PGHOST || 'localhost',
-    user: process.env.PGUSER || 'postgres',
-    password: process.env.PGPASSWORD || '',
-    database: process.env.PGDATABASE || 'saas_dev',
-    port: process.env.PGPORT ? parseInt(process.env.PGPORT, 10) : 5432,
-  });
 
-  await client.connect();
+  return results;
+}
 
-  try {
-    for (const f of findings) {
-      const q = `
-        INSERT INTO vulnerabilities
-          (scan_task_id, scanner, type, title, description, severity, evidence, verified_by_wpvulndb, created_at)
-        VALUES
-          ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, NOW())
-        RETURNING id
-      `;
-      const params = [
-        null,
-        f.scanner,
-        f.asset_type,
-        f.title,
-        f.description,
-        f.severity,
-        JSON.stringify(f.evidence),
-        f.verified_by_wpvulndb
-      ];
-      const res = await client.query(q, params);
-      console.log('Inserted vulnerability id:', res.rows[0].id);
-    }
-  } finally {
-    await client.end();
-  }
-};
+function mapWpscanVuln(v) {
+  const title = v.title || v.name || v.cve || v.id || (v.risk ? `Vulnerability ${v.risk}` : 'Vulnerability');
+  const description = v.description || v.summary || ensureString(v);
+  const severity = mapSeverity(v.severity || v.dbi_severity || v.risk || v.cvss || 'low');
+  const path = v.path || v.url || (v.entity && v.entity.path) || null;
+  const parameter = v.parameter || null;
+  const evidence = v.evidence || v.request || v.response || null;
+
+  return {
+    scanner: 'wpscan',
+    type: (v.type || v.vuln_type || inferTypeFromTitle(title)).toLowerCase(),
+    severity,
+    title: ensureString(title),
+    description: ensureString(description),
+    path,
+    parameter,
+    evidence: ensureString(evidence),
+    raw: v,
+  };
+}
+
+function inferTypeFromTitle(title) {
+  const t = String(title).toLowerCase();
+  if (t.includes('xss')) return 'xss';
+  if (t.includes('sql') || t.includes('sqli')) return 'sqli';
+  if (t.includes('lfi') || t.includes('local file')) return 'lfi';
+  if (t.includes('rce') || t.includes('remote code')) return 'rce';
+  if (t.includes('csrf')) return 'csrf';
+  return 'other';
+}
+
+module.exports = { parseWpscan };

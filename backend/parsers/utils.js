@@ -1,0 +1,17 @@
+function mapSeverity(source) {
+  if (!source) return 'low';
+  const s = String(source).toLowerCase();
+  if (['critical', 'high', 'medium', 'low'].includes(s)) return s;
+  if (s.includes('critical')) return 'critical';
+  if (s.includes('high')) return 'high';
+  if (s.includes('medium')) return 'medium';
+  return 'low';
+}
+
+function ensureString(v) {
+  if (v === undefined || v === null) return '';
+  if (typeof v === 'string') return v;
+  try { return JSON.stringify(v); } catch (_) { return String(v); }
+}
+
+module.exports = { mapSeverity, ensureString };

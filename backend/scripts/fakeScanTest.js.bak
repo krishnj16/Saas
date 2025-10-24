@@ -1,0 +1,56 @@
+// backend/scripts/fakeScanTest.js
+// Direct smoke-test that calls saveScanOutput and processScanResult
+// Avoids shell quoting / exec issues.
+
+const { saveScanOutput } = require('../workers/saveScanOutput');
+const { processScanResult } = require('../workers/processScanResult');
+
+async function test() {
+  const scanTaskId = 999999;
+  // Build JS object directly (no echo / shell quoting)
+  const fakeObj = {
+    plugins: {
+      'example-plugin': {
+        version: '1.2.3',
+        vulnerabilities: [
+          {
+            title: 'Fake XSS',
+            description: 'Fake description',
+            severity: 'high',
+            path: '/wp-content/plugins/example-plugin/vuln.php',
+            parameter: 'q',
+            evidence: '<script>1</script>',
+          },
+        ],
+      },
+    },
+  };
+
+  try {
+    // Save the raw JSON text (like runScanner would)
+    const saved = await saveScanOutput({
+      scanTaskId,
+      scannerName: 'wpscan',
+      rawText: JSON.stringify(fakeObj),
+    });
+    console.log('Saved scan_output id:', saved.id);
+
+    // Now pass the parsed object to processScanResult (this function will store unified vulns)
+    const inserted = await processScanResult({
+      scanTaskId,
+      scannerName: 'wpscan',
+      rawJson: fakeObj,
+    });
+
+    console.log('Inserted vulnerabilities count:', inserted.length);
+    console.log('Inserted rows (first):', inserted[0] || null);
+  } catch (err) {
+    console.error('Smoke test error', err);
+    process.exitCode = 1;
+  } finally {
+    // don't forcibly exit so you can see logs; but safe to exit
+    process.exit(0);
+  }
+}
+
+test();
