@@ -1,5 +1,6 @@
 const express = require("express");
-const bcrypt = require("bcrypt");
+const bcrypt = require('bcryptjs');
+
 const { v4: uuidv4 } = require("uuid");
 const userRepo = require("../repositories/userRepository");
 const { authenticate, authorizeRoles } = require("../middleware/auth");

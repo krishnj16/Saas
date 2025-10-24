@@ -1,0 +1,4 @@
+process.env.VIRUSTOTAL_API_KEY = process.env.VIRUSTOTAL_API_KEY || 'TEST_VT_KEY';
+process.env.IPQS_API_KEY = process.env.IPQS_API_KEY || 'TEST_IPQS_KEY';
+process.env.IP_REPUTATION_SCORE_THRESHOLD = process.env.IP_REPUTATION_SCORE_THRESHOLD || '80';
+process.env.IP_REPUTATION_CACHE_TTL = process.env.IP_REPUTATION_CACHE_TTL || '60';

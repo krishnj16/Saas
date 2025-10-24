@@ -1,0 +1,99 @@
+// backend/workers/scanWorker.js
+
+const path = require('path');
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+const fs = require('fs');
+const os = require('os');
+
+
+// Defensive import for bullmq (works even if QueueScheduler not available)
+let Worker; let QueueScheduler;
+try {
+  const bull = require(path.join(process.cwd(), 'node_modules', 'bullmq'));
+  Worker = bull && bull.Worker ? bull.Worker : require('bullmq').Worker;
+  QueueScheduler = bull && bull.QueueScheduler ? bull.QueueScheduler : (require('bullmq').QueueScheduler || null);
+} catch (e) {
+  try { Worker = require('bullmq').Worker; } catch (err) { console.error('[worker] bullmq missing - npm install --prefix . bullmq ioredis'); process.exit(1); }
+}
+
+const pool = require('../utils/db');
+const { runScannerDocker } = require('../utils/runScannerDocker');
+
+const QUEUE_NAME = process.env.SCAN_QUEUE_NAME || 'scanQueue';
+const connection = process.env.REDIS_URL ? { connectionString: process.env.REDIS_URL } : { host: process.env.REDIS_HOST || '127.0.0.1', port: process.env.REDIS_PORT ? Number(process.env.REDIS_PORT) : 6379 };
+const log = (...a) => console.log(new Date().toISOString(), ...a);
+
+let scheduler = null;
+if (QueueScheduler) {
+  try { scheduler = new QueueScheduler(QUEUE_NAME, { connection }); log('[worker] QueueScheduler created for', QUEUE_NAME); } catch (e) { log('[worker] QueueScheduler creation failed', e.message || e); }
+} else { log('[worker] QueueScheduler not available — continuing without scheduler.'); }
+
+function buildScannerCommand(url, opts = {}) {
+  const scanner = (opts.scanner || 'wpscan').toLowerCase();
+  if (scanner === 'wapiti') {
+    const image = opts.image || 'wapiti/wapiti';
+    const outFile = '/out/wapiti-result.json';
+    const args = ['-u', url, '-f', 'json', '-o', outFile];
+    return { image, args, outFile };
+  }
+  const image = opts.image || 'wpscanteam/wpscan';
+  const outFile = '/out/wpscan-result.json';
+  const args = ['--url', url, '--format', 'json', '--output', outFile];
+  return { image, args, outFile };
+}
+
+async function processor(job) {
+  log('[worker] Processing job', job.id, job.data);
+  const { websiteId, requestedBy, options } = job.data || {};
+  if (!websiteId) throw new Error('Missing websiteId');
+
+  const { rows } = await pool.query('SELECT id, url FROM websites WHERE id = $1 AND deleted_at IS NULL', [websiteId]);
+  if (!rows[0]) throw new Error('Website not found');
+  const website = rows[0];
+
+  const { image, args: imageArgs, outFile } = buildScannerCommand(website.url, options || {});
+  const tmpHostDir = fs.mkdtempSync(path.join(os.tmpdir(), `scan-${job.id}-`));
+  log('[worker] Created temp mount:', tmpHostDir);
+
+  const runnerOpts = {
+    memoryMB: Number(options?.memoryMB || process.env.SCAN_DEFAULT_MEMORY_MB || 512),
+    cpus: Number(options?.cpus || process.env.SCAN_DEFAULT_CPUS || 0.5),
+    user: options?.user || process.env.SCAN_DEFAULT_USER || '1000:1000',
+    mountHostDir: tmpHostDir,
+  };
+  const timeoutMs = Number(options?.timeoutMs || process.env.SCAN_DEFAULT_TIMEOUT_MS || 5 * 60 * 1000);
+
+  log(`[worker] Running docker image=${image} args=${JSON.stringify(imageArgs)} timeoutMs=${timeoutMs} memoryMB=${runnerOpts.memoryMB} cpus=${runnerOpts.cpus}`);
+
+  const res = await runScannerDocker(image, imageArgs, timeoutMs, runnerOpts);
+
+  let scanOutput = res.stdout || '';
+  const hostOutPath = path.join(tmpHostDir, path.basename(outFile));
+  if (fs.existsSync(hostOutPath)) {
+    try { scanOutput = fs.readFileSync(hostOutPath, 'utf8'); log('[worker] Read output file from mount:', hostOutPath); } catch (e) { log('[worker] Warning reading output file:', e.message || e); }
+  }
+
+  try {
+    await pool.query('INSERT INTO website_scans (website_id, status, created_at, meta) VALUES ($1, $2, NOW(), $3)', [website.id, res.success ? 'completed' : 'failed', JSON.stringify({ docker: res.logs, requestedBy, jobId: job.id })]);
+  } catch (e) {
+    log('[worker] Could not insert website_scans (table missing?):', e.message || e);
+  }
+
+  try {
+    if (res.success) { fs.rmSync(tmpHostDir, { recursive: true, force: true }); log('[worker] Cleaned temp mount dir:', tmpHostDir); } else { log('[worker] Keeping temp mount dir for debugging:', tmpHostDir); }
+  } catch (e) { log('[worker] cleanup error:', e.message || e); }
+
+  if (!res.success) {
+    const errMsg = res.timedOut ? 'Scanner timed out' : `Scanner exited with code ${res.code}`;
+    const err = new Error(errMsg); err.meta = res; throw err;
+  }
+
+  log('[worker] Job', job.id, 'completed');
+  return { ok: true, result: scanOutput, meta: res.logs };
+}
+
+const worker = new Worker(QUEUE_NAME, processor, { connection, concurrency: Number(process.env.WORKER_CONCURRENCY || 2) });
+worker.on('completed', (job) => log('[worker] Completed job', job.id));
+worker.on('failed', (job, err) => log('[worker] Failed job', job.id, err?.message || err));
+worker.on('error', (err) => log('[worker] worker error', err?.message || err));
