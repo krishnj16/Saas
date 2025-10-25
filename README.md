@@ -34,13 +34,16 @@ A Node.js + Express + PostgreSQL + Prisma project for building a SaaS-style vuln
 
 ---
 
-### **Day 4: Signup Endpoint (POST /auth/signup)**
-- Learned why storing plain passwords is unsafe
-- Understood difference between **hashing** (one-way) and **encryption** (two-way)
-- Used **bcrypt** for hashing with salt
-- Added proper error handling with correct HTTP status codes
-- **Deliverable:** working `POST /auth/signup` route
+---
 
+### **Day 4: Signup Endpoint (POST /auth/signup)**
+- Learned why storing plain passwords is unsafe  
+- Understood the difference between **hashing** (one-way) and **encryption** (two-way)  
+- Used **bcrypt** for hashing passwords with salt  
+- Added proper error handling with correct HTTP status codes  
+- **Deliverable:** Working `POST /auth/signup` route that securely stores hashed passwords  
+
+---
 ---
 
 ### **Day 5: Authentication (Signup & Login)**
@@ -157,3 +160,110 @@ A Node.js + Express + PostgreSQL + Prisma project for building a SaaS-style vuln
 - Ran WPScan on sample site → saved JSON output
 - Ran Wapiti on sample site → confirmed JSON format
 - Stored example outputs in `scanner_results/` for future parsing
+
+### **Day 18: Raw Output Storage & Unified Parsers**
+- Added `scan_outputs` table (PostgreSQL JSONB / S3 pointer) to store raw scanner JSON  
+- Updated worker to always save scanner stdout/stderr for every run  
+- Implemented parsers:
+  - `parseWpscan(json)` → normalized vulnerability objects  
+  - `parseWapiti(json)` → normalized vulnerability objects  
+- Wrote unit tests using saved sample JSON files  
+- **Deliverable:** Raw outputs safely stored; parsers return consistent, unified vulnerability objects  
+
+---
+
+### **Day 19: Sandboxed Scanner Execution (Docker)**
+- Created reusable `runScannerDocker()` wrapper inside worker  
+- Enforced safe execution:
+  - `--memory`, `--cpus`, `--network none`, timeout limit  
+  - Runs as non-root where possible  
+- Captured metadata (container id, exit code, stdout size) and handled failures gracefully  
+- **Deliverable:** Scanners run safely inside Docker containers; worker logs and recovers cleanly  
+
+---
+
+### **Day 20: Database Schema + Audit Logs + Indices**
+- Finalized backend tables:  
+  `scan_tasks`, `scan_outputs`, `vulnerabilities`, `malware_results`, `ip_reputation_results`, `notifications`, `audit_logs`  
+- Added GIN indices on JSONB columns and indexes on `website_id`, `scan_task_id`  
+- Implemented `logAudit(userId, action, resource, data)` utility → tracks enqueue/start/finish  
+- **Deliverable:** Migrations applied, performance improved, and audit trail active  
+
+---
+
+### **Day 21: Crawler & Input Discovery (Puppeteer)**
+- Built Puppeteer-based crawler for URL and form discovery  
+- Extracted:
+  - Pages, links, forms, hidden fields, and REST (`wp-json`) endpoints  
+- Stored results in `scan_discovery` table (url, method, param, input_type, sample_value)  
+- Added a “discovery-only” endpoint for manual testing  
+- **Deliverable:** Discovery inventory ready for injection engine  
+
+---
+
+### **Day 22: Safe Payload Injector (XSS / SQLi / CSRF Detection)**
+- Built a non-destructive injection engine that reads `scan_discovery`  
+- Implemented safe probes:
+  - Reflective XSS checks (using harmless markers)
+  - Time-based blind SQLi (small delays, strict limits)
+  - CSRF checks (missing anti-token fields)  
+- Added throttling + `SAFE_MODE` flag for safety  
+- Stored evidence (request, response snippet, timing difference)  
+- **Deliverable:** Injector detects vulnerabilities safely and stores findings in DB  
+
+---
+
+### **Day 23: Vulnerability Normalization & Deduplication**
+- Unified severity levels across scanners (`low / medium / high / critical`)  
+- Added dedup rules (website + path + parameter + type)  
+- Compared current vs previous scan to mark `new_since_last_scan`  
+- **Deliverable:** Clean, consistent, de-duplicated vulnerability records with new/old tags  
+
+---
+
+### **Day 24: Malware Scanning & VirusTotal Integration**
+- Added safe file downloader (plugin/theme files)  
+- Computed SHA-256 hashes and stored in `malware_results`  
+- Created VirusTotal lookup queue with rate-limit & TTL cache  
+- Worker processes jobs and flags malicious files automatically  
+- **Deliverable:** Files hashed + VirusTotal results cached + linked to scan records  
+
+---
+
+### **Day 25: IP Reputation Checks**
+- Resolved target IP addresses during scan startup  
+- Queued IP reputation lookups (IPQS / similar) with cached results  
+- Saved to `ip_reputation_results` and generated notifications for high risk IPs  
+- **Deliverable:** IP reputation data integrated into scan workflow and alert system  
+
+---
+
+### **Day 26: Notifications & API**
+- Created `notifications` table and endpoints:
+  - `GET /notifications` (paginated)  
+  - `POST /notifications/mark-read` (bulk)  
+- Added user/site preferences (e.g., email only for critical issues)  
+- Worker now creates notifications for critical findings, malware flags, and IP alerts  
+- **Deliverable:** Notification system operational with REST APIs and user settings  
+
+---
+
+### **Day 27: Real-Time Updates & Email Alerts**
+- Integrated Socket.IO with Express + JWT auth  
+- Worker emits events: `scan:started`, `scan:progress`, `scan:finished`, `vuln:found`  
+- Configured Nodemailer (Mailtrap in dev) to send emails on critical vulnerabilities  
+- **Deliverable:** Live dashboard updates + email alerts for high-severity findings  
+
+---
+
+### **Day 28: Security Hardening & Final Testing**
+- Strengthened auth security:
+  - Login throttling + lockout policy  
+  - Refresh tokens stored hashed in DB  
+- Added rate-limit middleware to heavy endpoints  
+- Implemented retention policy (90-day raw output purge / cold storage)  
+- Added DB backup (`pg_dump`) cron example and monitoring notes  
+- Wrote E2E test covering signup → add site → discovery → scan → notifications  
+- **Deliverable:** Production-ready backend with tests and deployment docs  
+
+---
