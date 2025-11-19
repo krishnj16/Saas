@@ -20,7 +20,7 @@ exports.createWebsite = async (req, res, next) => {
 
     const { url, active } = req.body;
     if (!url) return res.status(400).json({ error: 'URL required' });
-    if (!isValidUrl(url)) return res.status(400).json({ error: 'Invalid URL. Use http(s) scheme.' });
+    if (!isValidUrl(url)) return res.status(400).json({ error: 'Invalid URL. ' });
 
     const website = await WebsiteRepository.create({
       url: url.trim(),

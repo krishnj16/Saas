@@ -1,4 +1,3 @@
-// backend/scripts/check_mapped_now.js
 const pool = require('../utils/db');
 
 (async function() {

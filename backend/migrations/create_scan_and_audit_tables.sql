@@ -1,18 +1,5 @@
--- backend/migrations/create_scan_and_audit_tables.sql
--- Creates scan tables, vulnerabilities, outputs, malware/ip results, notifications and audit_logs
--- Idempotent where possible (uses IF NOT EXISTS and conditional blocks)
--- NOTE: create extension might require superuser; if it fails you can remove it or run manually.
-
 BEGIN;
-
--- Create extension for uuid generation (pgcrypto)
--- If you cannot create extension due to permission, remove this line and generate UUIDs in app code.
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
-
--- -------------------------
--- Tables (create with expected columns)
--- -------------------------
-
 CREATE TABLE IF NOT EXISTS scan_tasks (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   website_id uuid,

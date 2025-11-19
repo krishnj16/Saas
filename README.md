@@ -34,16 +34,12 @@ A Node.js + Express + PostgreSQL + Prisma project for building a SaaS-style vuln
 
 ---
 
-<<<<<<< HEAD
 ### **Day 4: Signup Endpoint (POST /auth/signup)**
 - Learned why storing plain passwords is unsafe
 - Understood difference between **hashing** (one-way) and **encryption** (two-way)
 - Used **bcrypt** for hashing with salt
 - Added proper error handling with correct HTTP status codes
 - **Deliverable:** working `POST /auth/signup` route
-=======
- ## Day 7 Progress
->>>>>>> 90fc1d4 (Update README.md)
 
 ### Implemented
 - **User Management API**
