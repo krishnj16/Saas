@@ -1,0 +1,11 @@
+{
+  "vulnerabilities": [
+    {
+      "name": "Reflected XSS",
+      "level": "high",
+      "path": "/search",
+      "parameter": "q",
+      "evidence": "<script>alert(1)</script>"
+    }
+  ]
+}
