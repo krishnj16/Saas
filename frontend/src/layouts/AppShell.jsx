@@ -1,7 +1,8 @@
 import React from "react";
-import TopBar from "./TopBar";
-import LeftNav from "./LeftNav";
-import RightDrawer from "./RightDrawer";
+import TopBar from "../components/TopBar";
+import LeftNav from "../components/LeftNav";
+import RightDrawer from "../components/RightDrawer";
+
 
 export default function AppShell({ children }){
   return (
