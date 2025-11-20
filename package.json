@@ -1,0 +1,77 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+  "test": "cross-env DOTENV_CONFIG_QUIET=true NODE_ENV=test jest --runInBand",
+  "check-env": "node scripts/check-env.js",
+  "check-env:ci": "cross-env DATABASE_URL=postgres://localhost:5432/mydb JWT_SECRET=0123456789abcdef0123456789abcdef NODE_ENV=development npm run check-env",
+  "emit:dev": "cross-env IGNORE_TLS=true MAIL_PORT=587 node scripts/emit_test_scan.js",
+  "dev": "nodemon index.js",
+  "start": "node index.js",
+  "migrate": "node scripts/run_migrations.js",
+  "list-jobs": "node scripts/listJobs.js",
+  "test-enqueue": "node scripts/testEnqueue.js",
+  "worker": "node workers/scanWorker.js",
+  "enqueue-test": "node workers/addJob.js",
+  "enqueue:many": "node tools/enqueue_many.js",
+  "enqueue:failers": "node tools/enqueue_failers.js",
+  "smoke": "node tools/smoke_test.js",
+  "test:echo": "node tests/echoTest.js",
+  "test:node-script": "node tests/childNodeScriptTest.js",
+  "test:day15": "npm run test:echo && npm run test:node-script",
+  "injector:run": "node backend/bin/injector-worker.js",
+  "injector:test": "jest backend/tests/injector.test.js"
+},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^6.15.0",
+    "@sentry/node": "^10.21.0",
+    "axios": "^1.12.2",
+    "bcryptjs": "^3.0.2",
+    "bullmq": "^5.61.0",
+    "cheerio": "^1.1.2",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "express-rate-limit": "^8.0.1",
+    "helmet": "^8.1.0",
+    "ioredis": "^5.8.1",
+    "jsonwebtoken": "^9.0.2",
+    "knex": "^3.1.0",
+    "node-fetch": "^2.7.0",
+    "nodemailer": "^7.0.10",
+    "p-limit": "^3.1.0",
+    "pg": "^8.16.3",
+    "puppeteer": "^24.24.1",
+    "redis": "^5.8.2",
+    "robots-parser": "^2.4.0",
+    "socket.io": "^4.8.1",
+    "uuid": "^8.3.2",
+    "winston": "^3.18.3",
+    "yargs": "^17.7.2",
+    "zod": "^4.1.4"
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0",
+    "jest": "^30.2.0",
+    "nock": "^13.5.6",
+    "prisma": "^6.15.0",
+    "sinon": "^15.2.0",
+    "supertest": "^6.3.4"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "globalTeardown": "<rootDir>/tests/jest.teardown.js",
+    "setupFiles": [
+      "<rootDir>/tests/jest.setup.js"
+    ],
+    "setupFilesAfterEnv": [
+      "<rootDir>/tests/jest.setupAfterEnv.js"
+    ],
+    "verbose": true
+  }
+}
