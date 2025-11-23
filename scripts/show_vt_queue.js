@@ -5,9 +5,9 @@ const { Client } = require('pg');
   try {
     await c.connect();
     const res = await c.query("SELECT id, sha256, attempts, created_at FROM virustotal_queue ORDER BY created_at DESC LIMIT 20");
-    console.log('virustotal_queue rows:', res.rows);
+    logger.info('virustotal_queue rows:', res.rows);
   } catch (e) {
-    console.error('ERROR show_vt_queue:', e.message || e);
+    logger.error('ERROR show_vt_queue:', e.message || e);
     process.exitCode = 1;
   } finally {
     await c.end();

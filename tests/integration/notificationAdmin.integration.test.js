@@ -58,7 +58,7 @@ describe('notification admin routes (integration)', () => {
         await pool.query(`DELETE FROM admin_mutes WHERE id = ANY($1::bigint[])`, [createdMuteIds]);
       }
     } catch (e) {
-      console.warn('Cleanup warning (admin):', e.message);
+      logger.warn('Cleanup warning (admin):', e.message);
     }
 
     try {

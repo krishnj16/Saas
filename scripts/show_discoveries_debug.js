@@ -1,21 +1,21 @@
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
-console.log('--- show_discoveries_debug starting ---');
+logger.info('--- show_discoveries_debug starting ---');
 
 let pool;
 try {
   pool = require('../utils/db');
-  console.log('DB module loaded from ../utils/db');
+  logger.info('DB module loaded from ../utils/db');
 } catch (e) {
-  console.error(' Could not require ../utils/db - file missing or path wrong.');
-  console.error('Error:', e && e.message);
+  logger.error(' Could not require ../utils/db - file missing or path wrong.');
+  logger.error('Error:', e && e.message);
   process.exit(1);
 }
 
 (async () => {
   try {
-    console.log('ENV PREVIEW:', {
+    logger.info('ENV PREVIEW:', {
       PGHOST: process.env.PGHOST,
       PGPORT: process.env.PGPORT,
       PGUSER: process.env.PGUSER,
@@ -27,10 +27,10 @@ try {
 
     try {
       const v = await pool.query('SELECT version() as v');
-      console.log('DB connected. Postgres version:', v.rows[0].v);
+      logger.info('DB connected. Postgres version:', v.rows[0].v);
     } catch (e) {
-      console.error(' DB connection/query failed. Check DB credentials and network.');
-      console.error('Error message:', e && e.message);
+      logger.error(' DB connection/query failed. Check DB credentials and network.');
+      logger.error('Error message:', e && e.message);
       process.exit(1);
     }
 
@@ -39,14 +39,14 @@ try {
       ['scan_discovery']
     );
     if (!t.rows.length) {
-      console.error(' Table scan_discovery NOT FOUND. Run migration script.');
-      console.error('Run: node scripts/run_migration.js');
+      logger.error(' Table scan_discovery NOT FOUND. Run migration script.');
+      logger.error('Run: node scripts/run_migration.js');
       process.exit(1);
     }
-    console.log(' Table scan_discovery exists');
+    logger.info(' Table scan_discovery exists');
 
     const cnt = await pool.query('SELECT COUNT(*)::int as c FROM scan_discovery');
-    console.log('Row count in scan_discovery =', cnt.rows[0].c);
+    logger.info('Row count in scan_discovery =', cnt.rows[0].c);
 
     const { rows } = await pool.query(`
       SELECT id, discovered_at, url, action_url, param_name, input_type, sample_value, is_hidden, is_csrf, extra
@@ -55,9 +55,9 @@ try {
       LIMIT 10
     `);
     if (!rows.length) {
-      console.warn(' No discovery rows found yet. Run discovery debug: node scripts/run_discovery_debug.js https://example.com');
+      logger.warn(' No discovery rows found yet. Run discovery debug: node scripts/run_discovery_debug.js https://example.com');
     } else {
-      console.log(' Latest discoveries:');
+      logger.info(' Latest discoveries:');
       console.table(rows.map(r => ({
         id: r.id,
         discovered_at: r.discovered_at,
@@ -72,10 +72,10 @@ try {
     }
 
   } catch (err) {
-    console.error(' Unexpected error:', err && err.message);
-    console.error(err);
+    logger.error(' Unexpected error:', err && err.message);
+    logger.error(err);
   } finally {
     try { pool.end(); } catch (e) {}
-    console.log('--- finished ---');
+    logger.info('--- finished ---');
   }
 })();

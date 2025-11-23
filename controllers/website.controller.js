@@ -12,8 +12,8 @@ function isValidUrl(s) {
 
 exports.createWebsite = async (req, res, next) => {
   try {
-    console.log('DEBUG createWebsite - user:', req.user);
-    console.log('DEBUG createWebsite - body:', req.body);
+    logger.info('DEBUG createWebsite - user:', req.user);
+    logger.info('DEBUG createWebsite - body:', req.body);
 
     const owner_id = req.user && req.user.id;
     if (!owner_id) return res.status(401).json({ error: 'Unauthorized' });

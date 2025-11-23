@@ -28,10 +28,10 @@ async function runTestHelper() {
 }
 if (require.main === module) {
   runTestHelper().then(rows => {
-    console.log('Rows:', rows);
+    logger.info('Rows:', rows);
     process.exit(0);
   }).catch(err => {
-    console.error(err);
+    logger.error(err);
     process.exit(1);
   });
 }

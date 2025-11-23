@@ -15,7 +15,7 @@ async function main() {
   try {
     const { rows } = await pool.query('SELECT id, email, user_uuid FROM "User" LIMIT 1;');
     if (!rows.length) {
-      console.error(' No users found in the database.');
+      logger.error(' No users found in the database.');
       process.exit(1);
     }
 
@@ -28,10 +28,10 @@ async function main() {
       { expiresIn: '8h' }
     );
 
-    console.log(' User chosen for token:', { id: user.id, email: user.email, user_uuid: user.user_uuid });
-    console.log(' JWT Token:\n', token);
+    logger.info(' User chosen for token:', { id: user.id, email: user.email, user_uuid: user.user_uuid });
+    logger.info(' JWT Token:\n', token);
   } catch (err) {
-    console.error(' Error generating token:', err && err.stack ? err.stack : err);
+    logger.error(' Error generating token:', err && err.stack ? err.stack : err);
     process.exit(1);
   } finally {
     await pool.end();

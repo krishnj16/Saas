@@ -18,7 +18,7 @@ async function run() {
     `);
     console.table(res.rows);
   } catch (err) {
-    console.error(err.message || err);
+    logger.error(err.message || err);
   } finally {
     await pool.end();
   }

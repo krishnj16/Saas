@@ -16,9 +16,9 @@ const { Client } = require('pg');
     const res = await client.query(
       `DELETE FROM scan_outputs WHERE created_at < NOW() - INTERVAL '${retention} days'`
     );
-    console.log(` Deleted rows: ${res.rowCount}`);
+    logger.info(` Deleted rows: ${res.rowCount}`);
   } catch (e) {
-    console.error(' Purge failed:', e.message);
+    logger.error(' Purge failed:', e.message);
   } finally {
     await client.end();
   }

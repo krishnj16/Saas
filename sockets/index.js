@@ -22,10 +22,10 @@ function initSockets(httpServer, options = {}) {
 
     const room = `user:${u.id}`;
     socket.join(room);
-    console.log(`socket[${socket.id}] joined ${room}`);
+    logger.info(`socket[${socket.id}] joined ${room}`);
 
     socket.on('join:website', (websiteId) => socket.join(`website:${websiteId}`));
-    socket.on('disconnect', (r) => console.log(`socket[${socket.id}] disconnected: ${r}`));
+    socket.on('disconnect', (r) => logger.info(`socket[${socket.id}] disconnected: ${r}`));
   });
 
   return io;

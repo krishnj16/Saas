@@ -3,7 +3,7 @@ require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 const nodemailer = require('nodemailer');
 
 (async function main(){
-  console.log('DEBUG env:', {
+  logger.info('DEBUG env:', {
     MAIL_HOST: process.env.MAIL_HOST,
     MAIL_PORT: process.env.MAIL_PORT,
     MAIL_USER: process.env.MAIL_USER ? '***set***' : '(unset)',
@@ -13,7 +13,7 @@ const nodemailer = require('nodemailer');
 
   const force = (process.env.FORCE_EMAIL_TEST || '').toLowerCase() === 'true';
   if (!force && process.env.EMAIL_ENABLED && process.env.EMAIL_ENABLED.toLowerCase() !== 'true') {
-    console.log('EMAIL_ENABLED != true and FORCE_EMAIL_TEST not set — exiting (no SMTP attempt). Set EMAIL_ENABLED=true or FORCE_EMAIL_TEST=true to force.');
+    logger.info('EMAIL_ENABLED != true and FORCE_EMAIL_TEST not set — exiting (no SMTP attempt). Set EMAIL_ENABLED=true or FORCE_EMAIL_TEST=true to force.');
     return;
   }
 
@@ -22,7 +22,7 @@ const nodemailer = require('nodemailer');
 
   const ignoreTLS = (process.env.IGNORE_TLS || '').toLowerCase() === 'true';
 
-  console.log(`Attempting to connect to SMTP ${host}:${port} (ignoreTLS=${ignoreTLS}) ...`);
+  logger.info(`Attempting to connect to SMTP ${host}:${port} (ignoreTLS=${ignoreTLS}) ...`);
 
   const transporter = nodemailer.createTransport({
     host,
@@ -36,16 +36,16 @@ const nodemailer = require('nodemailer');
 
   try {
     await transporter.verify();
-    console.log('transporter verified');
+    logger.info('transporter verified');
     const res = await transporter.sendMail({
       from: process.env.MAIL_FROM || 'test@example.com',
       to: process.env.TEST_USER_EMAIL || 'you@example.com',
       subject: 'SMTP test',
       text: `SMTP test from Saas backend (ignoreTLS=${ignoreTLS})`,
     });
-    console.log('Sent test email id:', res.messageId || res);
+    logger.info('Sent test email id:', res.messageId || res);
   } catch (err) {
-    console.error('transporter verify/send failed:', err && err.message ? err.message : err);
+    logger.error('transporter verify/send failed:', err && err.message ? err.message : err);
     process.exitCode = 1;
   }
 })();

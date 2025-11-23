@@ -6,7 +6,7 @@ const path = require('path');
 (async () => {
   const sqlFile = process.argv[2];
   if (!sqlFile) {
-    console.error('Usage: node scripts/run_sql.js <path_to_sql_file>');
+    logger.error('Usage: node scripts/run_sql.js <path_to_sql_file>');
     process.exit(1);
   }
 
@@ -23,12 +23,12 @@ const path = require('path');
 
   try {
     await client.connect();
-    console.log('Connected to DB');
-    console.log(`Running SQL from ${fullPath}`);
+    logger.info('Connected to DB');
+    logger.info(`Running SQL from ${fullPath}`);
     await client.query(sql);
-    console.log('Migration executed successfully');
+    logger.info('Migration executed successfully');
   } catch (err) {
-    console.error('Error:', err.message);
+    logger.error('Error:', err.message);
   } finally {
     await client.end();
   }

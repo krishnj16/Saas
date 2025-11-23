@@ -21,11 +21,11 @@ async function tableExists(client, table) {
 async function run() {
   const client = await pool.connect();
   try {
-    console.log('Starting migration fix for day25...');
+    logger.info('Starting migration fix for day25...');
     await client.query('BEGIN');
 
     if (!await tableExists(client, 'scan_ips')) {
-      console.log('Creating table scan_ips');
+      logger.info('Creating table scan_ips');
       await client.query(`
         CREATE TABLE IF NOT EXISTS scan_ips (
           id SERIAL PRIMARY KEY,
@@ -36,26 +36,26 @@ async function run() {
         )
       `);
     } else {
-      console.log('Table scan_ips exists — ensuring columns...');
+      logger.info('Table scan_ips exists — ensuring columns...');
       if (!await colExists(client, 'scan_ips', 'scan_id')) {
         await client.query(`ALTER TABLE scan_ips ADD COLUMN IF NOT EXISTS scan_id UUID`);
-        console.log('  added scan_id');
+        logger.info('  added scan_id');
       }
       if (!await colExists(client, 'scan_ips', 'host')) {
         await client.query(`ALTER TABLE scan_ips ADD COLUMN IF NOT EXISTS host TEXT`);
-        console.log('  added host');
+        logger.info('  added host');
       }
       if (!await colExists(client, 'scan_ips', 'ip')) {
         await client.query(`ALTER TABLE scan_ips ADD COLUMN IF NOT EXISTS ip TEXT`);
-        console.log('  added ip');
+        logger.info('  added ip');
       }
       if (!await colExists(client, 'scan_ips', 'created_at')) {
         await client.query(`ALTER TABLE scan_ips ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITH TIME ZONE DEFAULT now()`);
-        console.log('  added created_at');
+        logger.info('  added created_at');
       }
     }
     if (!await tableExists(client, 'ip_reputation_queue')) {
-      console.log('Creating table ip_reputation_queue');
+      logger.info('Creating table ip_reputation_queue');
       await client.query(`
         CREATE TABLE IF NOT EXISTS ip_reputation_queue (
           id SERIAL PRIMARY KEY,
@@ -71,7 +71,7 @@ async function run() {
         )
       `);
     } else {
-      console.log('Table ip_reputation_queue exists — ensuring columns...');
+      logger.info('Table ip_reputation_queue exists — ensuring columns...');
       const cols = [
         ['scan_id', 'UUID'],
         ['host_id', 'INTEGER'],
@@ -85,13 +85,13 @@ async function run() {
       ];
       for (const [c, def] of cols) {
         if (!await colExists(client, 'ip_reputation_queue', c)) {
-          console.log('  adding', c);
+          logger.info('  adding', c);
           await client.query(`ALTER TABLE ip_reputation_queue ADD COLUMN IF NOT EXISTS ${c} ${def}`);
         }
       }
     }
     if (!await tableExists(client, 'ip_reputation_results')) {
-      console.log('Creating table ip_reputation_results');
+      logger.info('Creating table ip_reputation_results');
       await client.query(`
         CREATE TABLE IF NOT EXISTS ip_reputation_results (
           id SERIAL PRIMARY KEY,
@@ -104,7 +104,7 @@ async function run() {
         )
       `);
     } else {
-      console.log('Table ip_reputation_results exists — ensuring columns...');
+      logger.info('Table ip_reputation_results exists — ensuring columns...');
       const cols = [
         ['ip', 'TEXT'],
         ['provider', 'TEXT'],
@@ -115,28 +115,28 @@ async function run() {
       ];
       for (const [c, def] of cols) {
         if (!await colExists(client, 'ip_reputation_results', c)) {
-          console.log('  adding', c);
+          logger.info('  adding', c);
           await client.query(`ALTER TABLE ip_reputation_results ADD COLUMN IF NOT EXISTS ${c} ${def}`);
         }
       }
     }
     const providerExists = await colExists(client, 'ip_reputation_results', 'provider');
     if (providerExists) {
-      console.log('Creating index idx_ip_reputation_results_ip_provider');
+      logger.info('Creating index idx_ip_reputation_results_ip_provider');
       await client.query(`CREATE INDEX IF NOT EXISTS idx_ip_reputation_results_ip_provider ON ip_reputation_results (ip, provider)`);
     } else {
-      console.log('Provider column missing — creating ip-only index idx_ip_reputation_results_ip');
+      logger.info('Provider column missing — creating ip-only index idx_ip_reputation_results_ip');
       await client.query(`CREATE INDEX IF NOT EXISTS idx_ip_reputation_results_ip ON ip_reputation_results (ip)`);
     }
 
-    console.log('Creating index idx_ip_reputation_queue_status');
+    logger.info('Creating index idx_ip_reputation_queue_status');
     await client.query(`CREATE INDEX IF NOT EXISTS idx_ip_reputation_queue_status ON ip_reputation_queue (status)`);
 
     await client.query('COMMIT');
-    console.log('Migration fix applied successfully.');
+    logger.info('Migration fix applied successfully.');
   } catch (err) {
     await client.query('ROLLBACK').catch(() => {});
-    console.error('Migration fix failed:', err);
+    logger.error('Migration fix failed:', err);
     process.exitCode = 1;
   } finally {
     try { client.release(); } catch (e) {}

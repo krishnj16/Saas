@@ -3,6 +3,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const crypto = require('crypto');
+const logger = require('../services/logger');
 
 function randomName(prefix = 'scanner') {
   return `${prefix}-${crypto.randomBytes(6).toString('hex')}`;
@@ -71,11 +72,11 @@ function runScannerDocker(image, imageArgs = [], timeoutMs = 5 * 60 * 1000, opts
 
     const child = spawn(cmd, dockerArgs);
 
-    console.info(`[runScannerDocker] started containerName=${containerName} image=${image} start=${startTime.toISOString()}`);
+    logger.info('[runScannerDocker] started', { containerName, image, start: startTime.toISOString() });
 
     const timeoutTimer = setTimeout(async () => {
       timedOut = true;
-      console.warn(`[runScannerDocker] timeout exceeded (${timeoutMs}ms) for containerName=${containerName}. Killing container.`);
+      logger.warn('[runScannerDocker] timeout exceeded', { timeoutMs, containerName });
       try {
         let cid = null;
         try { cid = fs.readFileSync(cidfilePath, 'utf8').trim(); } catch (e) {}
@@ -85,7 +86,7 @@ function runScannerDocker(image, imageArgs = [], timeoutMs = 5 * 60 * 1000, opts
           try { execFileSync('docker', ['kill', containerName], { timeout: 15_000 }); } catch (e) {}
         }
       } catch (e) {
-        console.error('[runScannerDocker] kill failed', e);
+        logger.error('[runScannerDocker] kill failed', { error: e });
       } finally {
         try { child.kill('SIGKILL'); } catch (e) {}
       }
@@ -116,7 +117,15 @@ function runScannerDocker(image, imageArgs = [], timeoutMs = 5 * 60 * 1000, opts
       const stdoutLen = Buffer.byteLength(stdout, 'utf8');
       const stderrLen = Buffer.byteLength(stderr, 'utf8');
 
-      console.info(`[runScannerDocker] finished containerName=${containerName} containerId=${containerId} exitCode=${code} stdoutLen=${stdoutLen} stderrLen=${stderrLen} start=${startTime.toISOString()} stop=${stopTime.toISOString()}`);
+      logger.info('[runScannerDocker] finished', {
+        containerName,
+        containerId,
+        exitCode: code,
+        stdoutLen,
+        stderrLen,
+        start: startTime.toISOString(),
+        stop: stopTime.toISOString(),
+      });
 
       if (isWindows) {
         try {
@@ -125,14 +134,14 @@ function runScannerDocker(image, imageArgs = [], timeoutMs = 5 * 60 * 1000, opts
             fs.writeFileSync(outPath, stdout, 'utf8');
           }
         } catch (e) {
-          console.warn('[runScannerDocker] failed writing stdout to tmp file on Windows', e && e.message);
+          logger.warn('[runScannerDocker] failed writing stdout to tmp file on Windows', { message: e && e.message });
         }
       }
 
       if (isWindows && code !== 0 && (!stderr || stderr.length === 0)) {
         try {
-          console.warn('[runScannerDocker] first run failed on Windows with no stderr - retrying once as root (--user 0)');
-          
+          logger.warn('[runScannerDocker] first run failed on Windows with no stderr - retrying once as root (--user 0)');
+
           const fallbackArgs = [...dockerArgsBase, '--user', '0', image, ...imageArgs];
           const fallback = spawnSync('docker', fallbackArgs, { encoding: 'utf8', maxBuffer: 50 * 1024 * 1024 });
           const fStdout = fallback.stdout || '';
@@ -145,7 +154,7 @@ function runScannerDocker(image, imageArgs = [], timeoutMs = 5 * 60 * 1000, opts
           let fallbackContainerId = null;
           try { if (fs.existsSync(cidfilePath)) fallbackContainerId = fs.readFileSync(cidfilePath, 'utf8').trim(); } catch (e) {}
 
-          console.info(`[runScannerDocker] fallback run exit=${fCode} fallbackContainerId=${fallbackContainerId}`);
+          logger.info('[runScannerDocker] fallback run', { exit: fCode, fallbackContainerId });
 
           if (fCode === 0) {
             let outputContents = null;
@@ -176,11 +185,11 @@ function runScannerDocker(image, imageArgs = [], timeoutMs = 5 * 60 * 1000, opts
             });
           }
         } catch (e) {
-          console.warn('[runScannerDocker] fallback as root failed to execute', e && e.message);
+          logger.warn('[runScannerDocker] fallback as root failed to execute', { message: e && e.message });
         }
       }
 
-      
+
       let outputContents = null;
       if (shouldMountHost) {
         try { outputContents = fs.readFileSync(path.join(volumeHost, 'wpscan-result.json'), 'utf8'); } catch (e) { /* ignore */ }

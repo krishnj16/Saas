@@ -6,9 +6,9 @@ const pool = require('./utils/db');
   try {
     try {
       await pool.query("CREATE EXTENSION IF NOT EXISTS pgcrypto;");
-      console.log('pgcrypto extension ensured');
+      logger.info('pgcrypto extension ensured');
     } catch (e) {
-      console.warn('Could not ensure pgcrypto (may require superuser). Continuing.');
+      logger.warn('Could not ensure pgcrypto (may require superuser). Continuing.');
     }
 
     const sql = `
@@ -21,9 +21,9 @@ const pool = require('./utils/db');
       );
     `;
     await pool.query(sql);
-    console.log(' website_scans table created (or already exists).');
+    logger.info(' website_scans table created (or already exists).');
   } catch (e) {
-    console.error('Migration failed:', e && e.message ? e.message : e);
+    logger.error('Migration failed:', e && e.message ? e.message : e);
   } finally {
     try { await pool.end(); } catch (e) {}
     process.exit(0);

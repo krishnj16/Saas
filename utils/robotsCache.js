@@ -15,7 +15,7 @@ async function getRobots(origin) {
     cache.set(origin, { robots, fetchedAt: now });
     return robots;
   } catch (err) {
-    console.warn('[robotsCache] error', err);
+    logger.warn('[robotsCache] error', err);
     return null;
   }
 }

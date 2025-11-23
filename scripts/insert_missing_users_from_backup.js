@@ -2,7 +2,7 @@ const pool = require('../utils/db');
 
 (async function() {
   try {
-    console.log(' Insert missing users from user_backup into users (using user_uuid as id)');
+    logger.info(' Insert missing users from user_backup into users (using user_uuid as id)');
     await pool.query('BEGIN');
 
     const insertSql = `
@@ -16,11 +16,11 @@ const pool = require('../utils/db');
 
     const r = await pool.query(insertSql);
     await pool.query('COMMIT');
-    console.log(' Inserted missing users count:', r.rowCount);
+    logger.info(' Inserted missing users count:', r.rowCount);
     if (r.rowCount > 0) console.table(r.rows);
   } catch (err) {
     try { await pool.query('ROLLBACK'); } catch (e) {}
-    console.error(' Error inserting missing users:', err.message || err);
+    logger.error(' Error inserting missing users:', err.message || err);
   } finally {
     await pool.end();
   }

@@ -1,3 +1,4 @@
+const logger = require('../services/logger');
 const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
@@ -18,7 +19,7 @@ async function main() {
   const outputPathArg = process.argv[3];
 
   if (!target) {
-    console.error('Usage: node workers/wpscan-worker.js <target-url> [outputPath]');
+    logger.error('Usage: node workers/wpscan-worker.js <target-url> [outputPath]');
     process.exit(1);
   }
 
@@ -32,18 +33,18 @@ async function main() {
     : path.join(outDir, 'result.json');
 
   fs.mkdirSync(outDir, { recursive: true });
-  console.log('Output folder:', outDir);
-  console.log('Expected output file:', outputFile);
+  logger.info('Output folder:', outDir);
+  logger.info('Expected output file:', outputFile);
 
   const winOutDir = path.resolve(outDir);
 
   if (!process.env.WPSCAN_TOKEN) {
-    console.warn('NOTE: WPSCAN_TOKEN not set. WPVulnDB lookups will be skipped (verified_by_wpvulndb = false).');
+    logger.warn('NOTE: WPSCAN_TOKEN not set. WPVulnDB lookups will be skipped (verified_by_wpvulndb = false).');
   }
   try {
     await runCommand('docker', ['version']);
   } catch (err) {
-    console.error('Docker CLI not available.');
+    logger.error('Docker CLI not available.');
     process.exit(2);
   }
 
@@ -58,7 +59,7 @@ async function main() {
     '-o', '/output/result.json'
   ];
 
-  console.log('Running WPScan docker. This may take a minute...');
+  logger.info('Running WPScan docker. This may take a minute...');
 
   try {
 
@@ -72,7 +73,7 @@ async function main() {
 
 
     if (!fs.existsSync(outputFile)) {
-      console.error('Expected output file not found at', outputFile);
+      logger.error('Expected output file not found at', outputFile);
       process.exit(3);
     }
 
@@ -80,10 +81,10 @@ async function main() {
     const verified = !!process.env.WPSCAN_TOKEN; 
     await parseWpscan(outputFile, { verifiedByWpvulndb: verified });
 
-    console.log('Scan complete and parsed into DB.');
+    logger.info('Scan complete and parsed into DB.');
     process.exit(0);
   } catch (err) {
-    console.error('Worker failed:', err.message || err);
+    logger.error('Worker failed:', err.message || err);
     process.exit(4);
   }
 }

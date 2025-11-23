@@ -1,0 +1,58 @@
+
+const z = require('zod');
+const logger = require('./logger');
+
+if (process.env.NODE_ENV === 'test') {
+  process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgres://localhost:5432/testdb';
+  process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-secret';
+  process.env.CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
+  process.env.NODE_ENV = 'test';
+  process.env.VIRUSTOTAL_API_KEY = process.env.VIRUSTOTAL_API_KEY || 'test-vt-key';
+}
+
+const schema = z.object({
+  NODE_ENV: z.string(),
+  DATABASE_URL: z.string(),
+  JWT_SECRET: z.string(),
+  CLIENT_ORIGIN: z.string().optional(),
+  PORT: z.string().optional(),
+});
+
+const parsed = schema.safeParse(process.env);
+if (!parsed.success) {
+  try {
+    if (logger && typeof logger.error === 'function') {
+      logger.error('Invalid env config', parsed.error.format());
+    } else {
+      
+      console.error('Invalid env config', parsed.error.format());
+    }
+  } catch (e) {
+    console.error('Invalid env config (and logger failed)', parsed.error.format());
+  }
+
+  try {
+    if (process.env.NODE_ENV !== 'test') {
+      
+      logger && typeof logger.warn === 'function'
+        ? logger.warn('Continuing despite invalid env config (non-test).')
+        : console.warn('Continuing despite invalid env config (non-test).');
+    } else {
+      logger && typeof logger.warn === 'function'
+        ? logger.warn('Running in test mode with default env values.')
+        : console.warn('Running in test mode with default env values.');
+    }
+  } catch (e) {
+    console.warn('Env config validation warning (logger failed).');
+  }
+}
+
+const config = {
+  env: parsed.success ? parsed.data.NODE_ENV : process.env.NODE_ENV,
+  DATABASE_URL: parsed.success ? parsed.data.DATABASE_URL : process.env.DATABASE_URL,
+  JWT_SECRET: parsed.success ? parsed.data.JWT_SECRET : process.env.JWT_SECRET,
+  CLIENT_ORIGIN: parsed.success ? parsed.data.CLIENT_ORIGIN : process.env.CLIENT_ORIGIN,
+  PORT: parsed.success && parsed.data.PORT ? Number(parsed.data.PORT) : (process.env.PORT ? Number(process.env.PORT) : undefined),
+};
+
+module.exports = config;

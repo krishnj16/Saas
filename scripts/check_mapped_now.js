@@ -10,7 +10,7 @@ const pool = require('../utils/db');
     `);
     console.table(r.rows);
   } catch (err) {
-    console.error(err.message || err);
+    logger.error(err.message || err);
   } finally {
     await pool.end();
   }

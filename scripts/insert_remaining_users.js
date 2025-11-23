@@ -3,7 +3,7 @@ const pool = require('../utils/db');
 
 (async function() {
   try {
-    console.log('➡️ Inserting remaining users from user_backup where safe (no email conflict)');
+    logger.info('➡️ Inserting remaining users from user_backup where safe (no email conflict)');
     await pool.query('BEGIN');
 
     const insertSql = `
@@ -19,11 +19,11 @@ const pool = require('../utils/db');
 
     const r = await pool.query(insertSql);
     await pool.query('COMMIT');
-    console.log(' Inserted users from user_backup (no email conflicts). Count:', r.rowCount);
+    logger.info(' Inserted users from user_backup (no email conflicts). Count:', r.rowCount);
     if (r.rowCount) console.table(r.rows);
   } catch (err) {
     try { await pool.query('ROLLBACK'); } catch(e) {}
-    console.error(' Error inserting remaining users:', err.message || err);
+    logger.error(' Error inserting remaining users:', err.message || err);
   } finally {
     await pool.end();
   }

@@ -12,15 +12,15 @@ const pool = require('./utils/db');
       LIMIT 50
     `);
     if (!rows || rows.length === 0) {
-      console.log('No websites found in the database.');
+      logger.info('No websites found in the database.');
       process.exit(0);
     }
-    console.log('Recent websites (id — url):');
+    logger.info('Recent websites (id — url):');
     rows.forEach(r => {
-      console.log(`${r.id}  —  ${r.url}`);
+      logger.info(`${r.id}  —  ${r.url}`);
     });
   } catch (e) {
-    console.error('DB error:', e && e.message ? e.message : e);
+    logger.error('DB error:', e && e.message ? e.message : e);
   } finally {
     try { await pool.end(); } catch (e) {}
     process.exit(0);

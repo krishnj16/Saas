@@ -1,3 +1,4 @@
+const logger = require('../services/logger');
 const { processScan } = require('../services/vulnProcessor');
 const { pool } = require('../utils/db');
 
@@ -9,7 +10,7 @@ async function postprocessJob(scanId, websiteId) {
   
 
   const res = await processScan(scanId, websiteId, rawFindings);
-  console.log('Postprocess result', res);
+  logger.info('Postprocess result', res);
   return res;
 }
 

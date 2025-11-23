@@ -1,0 +1,34 @@
+const { createLogger, transports, format } = require('winston');
+
+const scrub = (obj) => {
+  try {
+    const s = JSON.stringify(obj);
+    return s.replace(/("?(api_key|apiKey|secret|JWT_SECRET|password|token|access_token)"?\s*:\s*)"(?:[^"\\]|\\.)*"/gi, '$1"[REDACTED]"');
+  } catch (e) {
+    return obj;
+  }
+};
+
+const logger = createLogger({
+  level: process.env.LOG_LEVEL || 'info',
+  format: format.combine(
+    format.timestamp(),
+    format.errors({ stack: true }),
+    format.json()
+  ),
+  transports: [ new transports.Console() ]
+});
+
+module.exports = {
+  info: (msg, meta) => logger.info(msg, { meta: scrub(meta) }),
+  error: (msg, meta) => logger.error(msg, { meta: scrub(meta) }),
+  warn: (msg, meta) => logger.warn(msg, { meta: scrub(meta) }),
+  child: (extra) => {
+    const childLogger = logger.child ? logger.child(extra) : logger;
+    return {
+      info: (m, meta) => childLogger.info(m, { meta: scrub(meta) }),
+      error: (m, meta) => childLogger.error(m, { meta: scrub(meta) }),
+      warn: (m, meta) => childLogger.warn(m, { meta: scrub(meta) }),
+    };
+  }
+};

@@ -7,11 +7,11 @@ const { randomUUID } = require('crypto');
 const { saveScanOutput } = require('../workers/saveScanOutput');
 const { processScanResult } = require('../workers/processScanResult');
 
-console.log(' fakeScanTest.js starting...');
+logger.info(' fakeScanTest.js starting...');
 
 (async function test() {
   const scanTaskId = randomUUID();
-  console.log('Generated scanTaskId:', scanTaskId);
+  logger.info('Generated scanTaskId:', scanTaskId);
 
   const fakeObj = {
     plugins: {
@@ -32,32 +32,32 @@ console.log(' fakeScanTest.js starting...');
   };
 
   try {
-    console.log('1) Saving raw scan output into scan_outputs...');
+    logger.info('1) Saving raw scan output into scan_outputs...');
     const saved = await saveScanOutput({
       scanTaskId,
       scannerName: 'wpscan',
       rawText: JSON.stringify(fakeObj),
     });
-    console.log(' Saved scan_output id:', saved && saved.id ? saved.id : saved);
+    logger.info(' Saved scan_output id:', saved && saved.id ? saved.id : saved);
 
-    console.log('2) Calling processScanResult to parse & insert unified vulnerabilities...');
+    logger.info('2) Calling processScanResult to parse & insert unified vulnerabilities...');
     const inserted = await processScanResult({
       scanTaskId,
       scannerName: 'wpscan',
       rawJson: fakeObj,
     });
 
-    console.log(' processScanResult returned. Inserted count:', Array.isArray(inserted) ? inserted.length : '(not an array)');
+    logger.info(' processScanResult returned. Inserted count:', Array.isArray(inserted) ? inserted.length : '(not an array)');
     if (Array.isArray(inserted) && inserted.length > 0) {
-      console.log('First inserted row (sample):');
-      console.log(JSON.stringify(inserted[0], null, 2));
+      logger.info('First inserted row (sample):');
+      logger.info(JSON.stringify(inserted[0], null, 2));
     } else {
-      console.log('⚠️ No vulnerabilities were inserted (empty array).');
+      logger.info('⚠️ No vulnerabilities were inserted (empty array).');
     }
   } catch (err) {
-    console.error('Smoke test error (full stack):');
-    if (err && err.stack) console.error(err.stack);
-    else console.error(err);
+    logger.error('Smoke test error (full stack):');
+    if (err && err.stack) logger.error(err.stack);
+    else logger.error(err);
     if (err && typeof err === 'object') {
       try {
         const debugParts = {
@@ -67,7 +67,7 @@ console.log(' fakeScanTest.js starting...');
           detail: err.detail,
           where: err.where,
         };
-        console.error('Error details:', JSON.stringify(debugParts, null, 2));
+        logger.error('Error details:', JSON.stringify(debugParts, null, 2));
       } catch (ignore) {}
     }
   } finally {

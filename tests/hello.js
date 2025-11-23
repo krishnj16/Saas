@@ -1,1 +1,1 @@
-console.log('Hello from child Node script!');
+logger.info('Hello from child Node script!');

@@ -12,7 +12,7 @@ const q = new Queue(process.env.SCAN_QUEUE_NAME || 'scanQueue', { connection });
 async function enqueueWebsiteScan({ websiteId, userId }) {
   const jobId = await enqueueFunction(websiteId); 
 
-  console.log(` Enqueued job with ID: ${jobId} for website: ${websiteId}`);
+  logger.info(` Enqueued job with ID: ${jobId} for website: ${websiteId}`);
 
   await logAudit(userId || null, 'enqueue_scan_task', 'scan_task', jobId, {
     website_id: websiteId,
@@ -25,7 +25,7 @@ async function enqueueWebsiteScan({ websiteId, userId }) {
 (async () => {
   const websiteUuid = process.argv[2];
   if (!websiteUuid) {
-    console.error('Usage: node enqueueWithUuid.js <website-uuid>');
+    logger.error('Usage: node enqueueWithUuid.js <website-uuid>');
     process.exit(1);
   }
   try {
@@ -34,9 +34,9 @@ async function enqueueWebsiteScan({ websiteId, userId }) {
       requestedBy: 'devtest',
       options: { scanner: 'wpscan', timeoutMs: 2 * 60 * 1000 } 
     });
-    console.log(' Enqueued job with ID:', job.id, 'for website:', websiteUuid);
+    logger.info(' Enqueued job with ID:', job.id, 'for website:', websiteUuid);
   } catch (e) {
-    console.error('Failed to enqueue job:', e && e.message ? e.message : e);
+    logger.error('Failed to enqueue job:', e && e.message ? e.message : e);
   } finally {
     process.exit(0);
   }

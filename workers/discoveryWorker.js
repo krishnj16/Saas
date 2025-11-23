@@ -1,3 +1,4 @@
+const logger = require('../services/logger');
 
 
 const puppeteer = require('puppeteer');
@@ -81,7 +82,7 @@ async function saveDiscovery(rows) {
     await client.query('COMMIT');
   } catch (e) {
     await client.query('ROLLBACK');
-    console.error('saveDiscovery batch insert error', e);
+    logger.error('saveDiscovery batch insert error', e);
     throw e;
   } finally {
     client.release();
@@ -122,7 +123,7 @@ async function discoverForScanTask({ scanTaskId = null, startUrl, maxDepth = DEF
       try {
         await page.goto(url, { waitUntil: 'domcontentloaded' });
       } catch (e) {
-        console.warn('Navigation failed for', url, e.message?.slice(0,120));
+        logger.warn('Navigation failed for', url, e.message?.slice(0,120));
         continue;
       }
 
@@ -159,7 +160,7 @@ async function discoverForScanTask({ scanTaskId = null, startUrl, maxDepth = DEF
           });
         });
       } catch (e) {
-        console.warn('form extraction failed for', url, e.message?.slice(0,120));
+        logger.warn('form extraction failed for', url, e.message?.slice(0,120));
       }
 
       for (const f of forms) {
@@ -230,7 +231,7 @@ async function discoverForScanTask({ scanTaskId = null, startUrl, maxDepth = DEF
     try { await page.close(); } catch (e) {}
     try { await browser.close(); } catch (e) {}
   } catch (err) {
-    console.error('discoverForScanTask error', err);
+    logger.error('discoverForScanTask error', err);
     throw err;
   }
 }

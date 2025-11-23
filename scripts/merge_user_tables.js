@@ -25,13 +25,13 @@ function fallbackForColumn(colName, dataType) {
 
 async function run() {
   try {
-    console.log(' Starting safer merge from "User" -> users');
+    logger.info(' Starting safer merge from "User" -> users');
 
-    console.log('  Creating backup user_backup and copying data...');
+    logger.info('  Creating backup user_backup and copying data...');
     await pool.query('CREATE TABLE IF NOT EXISTS user_backup AS TABLE "User" WITH NO DATA');
     await pool.query('TRUNCATE user_backup');
     await pool.query('INSERT INTO user_backup SELECT * FROM "User"');
-    console.log(' Backup created: user_backup');
+    logger.info(' Backup created: user_backup');
 
     const colsQuery = `
       SELECT table_name, column_name, data_type, is_nullable, column_default
@@ -65,8 +65,8 @@ async function run() {
     const userCols = userColsMeta.map(c => c.name);
     const usersCols = usersColsMeta.map(c => c.name);
 
-    console.log(' "User" columns:', userCols.join(', '));
-    console.log('  users columns:', usersCols.join(', '));
+    logger.info(' "User" columns:', userCols.join(', '));
+    logger.info('  users columns:', usersCols.join(', '));
 
     const common = userCols.filter(c => usersCols.includes(c));
     if (!common.includes('id')) {
@@ -77,8 +77,8 @@ async function run() {
       .filter(c => c.is_nullable === 'NO' && (c.column_default === null))
       .map(c => ({ name: c.name, data_type: c.data_type }));
 
-    console.log('Common columns to copy:', common.join(', '));
-    console.log(' Required target columns without default:', requiredTargetCols.map(c => c.name).join(', ') || '(none)');
+    logger.info('Common columns to copy:', common.join(', '));
+    logger.info(' Required target columns without default:', requiredTargetCols.map(c => c.name).join(', ') || '(none)');
 
  
     const targetColsToInsert = Array.from(new Set([...common, ...requiredTargetCols.map(c => c.name)]));
@@ -126,9 +126,9 @@ async function run() {
       RETURNING id;
     `;
 
-    console.log(' Running insert to merge rows (with fallbacks for required columns)...');
+    logger.info(' Running insert to merge rows (with fallbacks for required columns)...');
     const res = await pool.query(insertSQL);
-    console.log(` Inserted ${res.rowCount} rows into users.`);
+    logger.info(` Inserted ${res.rowCount} rows into users.`);
 
     const skippedRes = await pool.query(`
       SELECT COUNT(*) AS skipped_count
@@ -139,7 +139,7 @@ async function run() {
       );
     `);
     const skipped = Number(skippedRes.rows[0].skipped_count || 0);
-    console.log(` Skipped ${skipped} source rows where id was not UUID-compatible.`);
+    logger.info(` Skipped ${skipped} source rows where id was not UUID-compatible.`);
 
     const counts = await pool.query(`
       SELECT
@@ -149,15 +149,15 @@ async function run() {
     `);
     console.table(counts.rows);
 
-    console.log('Merge completed. Backup available in user_backup.');
+    logger.info('Merge completed. Backup available in user_backup.');
     if (skipped > 0) {
-      console.log('Some rows were skipped. Inspect them with:');
-      console.log(`node -e "const p=require('./backend/utils/db');(async()=>{const r=await p.query(\\\`SELECT id,* FROM \\"User\\" u WHERE NOT (pg_typeof(u.id)='uuid'::regtype OR (pg_typeof(u.id)='text'::regtype AND u.id ~ '${regex}')) LIMIT 200\\\`); console.table(r.rows); await p.end();})();"`);
+      logger.info('Some rows were skipped. Inspect them with:');
+      logger.info(`node -e "const p=require('./backend/utils/db');(async()=>{const r=await p.query(\\\`SELECT id,* FROM \\"User\\" u WHERE NOT (pg_typeof(u.id)='uuid'::regtype OR (pg_typeof(u.id)='text'::regtype AND u.id ~ '${regex}')) LIMIT 200\\\`); console.table(r.rows); await p.end();})();"`);
     }
-    console.log('If everything looks good you may DROP TABLE "User" (backup exists).');
+    logger.info('If everything looks good you may DROP TABLE "User" (backup exists).');
 
   } catch (err) {
-    console.error(' Merge failed:', err.message || err);
+    logger.error(' Merge failed:', err.message || err);
   } finally {
     await pool.end();
   }

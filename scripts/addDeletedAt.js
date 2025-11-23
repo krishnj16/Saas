@@ -18,9 +18,9 @@ async function run() {
 
   try {
     await pool.query(sql);
-    console.log(' deleted_at column added successfully');
+    logger.info(' deleted_at column added successfully');
   } catch (err) {
-    console.error(' Migration failed:', err);
+    logger.error(' Migration failed:', err);
   } finally {
     pool.end();
   }

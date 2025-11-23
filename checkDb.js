@@ -8,13 +8,13 @@ function maskUrl(u) {
 }
 
 const u = process.env.DATABASE_URL || '';
-console.log('DATABASE_URL present ->', !!u);
-if (u) console.log('masked ->', maskUrl(u));
+logger.info('DATABASE_URL present ->', !!u);
+if (u) logger.info('masked ->', maskUrl(u));
 
 try {
   if (u) {
     const url = new URL(u);
-    console.log('parsed ->', {
+    logger.info('parsed ->', {
       user: url.username || null,
       password: url.password ? '***' : null,
       host: url.hostname || null,
@@ -24,11 +24,11 @@ try {
       endsWithQuote: /["']$/.test(u.trim()),
     });
   } else {
-    console.log('parsed -> no DATABASE_URL to parse (check backend/.env)');
+    logger.info('parsed -> no DATABASE_URL to parse (check backend/.env)');
   }
 } catch (e) {
-  console.log('PARSE_ERROR ->', e.message);
-  console.log('raw preview ->', (u || '').slice(0, 160));
+  logger.info('PARSE_ERROR ->', e.message);
+  logger.info('raw preview ->', (u || '').slice(0, 160));
 }
 
 (async () => {
@@ -42,10 +42,10 @@ try {
 
   try {
     const r = await pool.query('SELECT NOW()');
-    console.log('DB OK ->', r.rows[0]);
+    logger.info('DB OK ->', r.rows[0]);
     process.exit(0);
   } catch (err) {
-    console.error('DB ERROR ->', err.message);
+    logger.error('DB ERROR ->', err.message);
     process.exit(1);
   } finally {
     try { await pool.end(); } catch (e) {}

@@ -7,9 +7,9 @@ require('dotenv').config();
   const q = new Queue('scanQueue', { connection });
   try {
     const job = await q.add('scan-website', { websiteId: '80331fc3-0365-4188-89f6-01a9d3903f21', requestedBy: 'dev-test' }, { removeOnComplete: true });
-    console.log('enqueued job id:', job.id);
+    logger.info('enqueued job id:', job.id);
   } catch (e) {
-    console.error('enqueue error:', e.stack || e);
+    logger.error('enqueue error:', e.stack || e);
   } finally {
     await q.close();
     process.exit(0);

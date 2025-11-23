@@ -17,7 +17,7 @@ const { Client } = require('pg');
     );
     console.table(res.rows);
   } catch (err) {
-    console.error('Error querying user_refresh_tokens:', err.message || err);
+    logger.error('Error querying user_refresh_tokens:', err.message || err);
     process.exitCode = 2;
   } finally {
     await client.end();

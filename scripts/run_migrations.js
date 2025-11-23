@@ -1,7 +1,8 @@
-// backend/scripts/run_migrations.js
 const fs = require('fs');
 const path = require('path');
 const { Pool } = require('pg');
+const logger = console;  
+
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 
@@ -33,16 +34,16 @@ async function appliedMigrations() {
 async function applyMigration(filename) {
   const fullPath = path.join(migrationsDir, filename);
   const sql = fs.readFileSync(fullPath, 'utf8');
-  console.log('Applying', filename);
+  logger.info('Applying', filename);
   try {
     await pool.query('BEGIN');
     await pool.query(sql);
     await pool.query('INSERT INTO schema_migrations (filename) VALUES ($1)', [filename]);
     await pool.query('COMMIT');
-    console.log('Applied', filename);
+    logger.info('Applied', filename);
   } catch (err) {
     await pool.query('ROLLBACK');
-    console.error('Failed to apply', filename, err);
+    logger.error('Failed to apply', filename, err);
     throw err;
   }
 }
@@ -59,12 +60,12 @@ async function run() {
       if (!applied.has(f)) {
         await applyMigration(f);
       } else {
-        console.log('Skipping already applied', f);
+        logger.info('Skipping already applied', f);
       }
     }
-    console.log('All migrations done');
+    logger.info('All migrations done');
   } catch (err) {
-    console.error('Migration runner failed', err);
+    logger.error('Migration runner failed', err);
     process.exitCode = 1;
   } finally {
     await pool.end();

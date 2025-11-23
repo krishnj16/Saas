@@ -1,14 +1,15 @@
+const logger = require('../services/logger');
 
 
 const { runAllPending } = require('../services/injector/index');
 
 async function scheduledRun() {
-  console.log('[injectorWorker] scheduled run start', new Date().toISOString());
+  logger.info('[injectorWorker] scheduled run start', new Date().toISOString());
   try {
     await runAllPending({ dryRun: process.env.DRY_RUN === 'true' });
-    console.log('[injectorWorker] scheduled run completed');
+    logger.info('[injectorWorker] scheduled run completed');
   } catch (err) {
-    console.error('[injectorWorker] error', err);
+    logger.error('[injectorWorker] error', err);
   }
 }
 

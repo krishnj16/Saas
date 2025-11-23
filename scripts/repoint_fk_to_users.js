@@ -3,7 +3,7 @@ const pool = require('../utils/db');
 
 (async function() {
   try {
-    console.log(' Re-pointing websites.fk_websites_owner_user_uuid -> users(id)');
+    logger.info(' Re-pointing websites.fk_websites_owner_user_uuid -> users(id)');
 
     await pool.query('BEGIN');
 
@@ -11,10 +11,10 @@ const pool = require('../utils/db');
     await pool.query('ALTER TABLE websites ADD CONSTRAINT fk_websites_owner_user_uuid FOREIGN KEY (owner_id) REFERENCES users(id)');
 
     await pool.query('COMMIT');
-    console.log(' Re-pointed fk_websites_owner_user_uuid -> users(id)');
+    logger.info(' Re-pointed fk_websites_owner_user_uuid -> users(id)');
   } catch (err) {
     try { await pool.query('ROLLBACK'); } catch (e) {}
-    console.error('Error re-pointing FK:', err.message || err);
+    logger.error('Error re-pointing FK:', err.message || err);
   } finally {
     await pool.end();
   }

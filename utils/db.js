@@ -53,7 +53,7 @@ const poolConfig = connectionString
 const pool = new Pool(poolConfig);
 
 pool.on('error', (err) => {
-  console.error('[db] Unexpected error on idle client:', err?.message || err);
+  logger.error('[db] Unexpected error on idle client:', err?.message || err);
 });
 
 module.exports = pool;

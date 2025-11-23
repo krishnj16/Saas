@@ -1,6 +1,7 @@
+const logger = require('../services/logger');
 const express = require('express');
 const router = express.Router();
-const log = (...a) => console.log(new Date().toISOString(), ...a);
+const log = (...a) => logger.info(new Date().toISOString(), ...a);
 
 let discoveryWorker;
 try {

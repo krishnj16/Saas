@@ -12,10 +12,10 @@ async function logAudit(userId, action, resourceType, resourceId, data = null) {
        RETURNING id, timestamp`,
       [userId || null, action, resourceType, resourceId || null, data ? JSON.stringify(data) : null]
     );
-    console.log(`[audit] Logged ${action} (id=${res.rows[0].id})`);
+    logger.info(`[audit] Logged ${action} (id=${res.rows[0].id})`);
     return res.rows[0];
   } catch (err) {
-    console.error('[audit] Failed to log audit entry:', err.message || err);
+    logger.error('[audit] Failed to log audit entry:', err.message || err);
     return null; 
   }
 }

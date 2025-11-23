@@ -5,14 +5,14 @@ const { logAudit } = require('../utils/auditLogger');
 
 (async function test() {
   try {
-    console.log('Starting audit log test...');
+    logger.info('Starting audit log test...');
 
     let websiteId = null;
     try {
       const r = await pool.query(`SELECT id, url FROM websites WHERE deleted_at IS NULL LIMIT 1`);
       if (r.rows.length > 0) {
         websiteId = r.rows[0].id;
-        console.log('Using existing website id:', websiteId, 'url=', r.rows[0].url);
+        logger.info('Using existing website id:', websiteId, 'url=', r.rows[0].url);
       } else {
         const insertSite = await pool.query(
           `INSERT INTO websites (name, url, created_at)
@@ -21,10 +21,10 @@ const { logAudit } = require('../utils/auditLogger');
           ['__test_dummy_site__', 'https://example.test']
         );
         websiteId = insertSite.rows[0].id;
-        console.log('Inserted dummy website id:', websiteId);
+        logger.info('Inserted dummy website id:', websiteId);
       }
     } catch (err) {
-      console.error(' Failed to find/insert website:', err.message || err);
+      logger.error(' Failed to find/insert website:', err.message || err);
       throw err;
     }
 
@@ -35,7 +35,7 @@ const { logAudit } = require('../utils/auditLogger');
     );
 
     const scanTaskId = insertRes.rows[0].id;
-    console.log('Created scan_task:', scanTaskId, 'for website:', websiteId);
+    logger.info('Created scan_task:', scanTaskId, 'for website:', websiteId);
 
     await logAudit(websiteId, 'enqueue_scan_task', 'scan_task', scanTaskId, { note: 'test enqueue' });
     await logAudit(null, 'start_scan_task', 'scan_task', scanTaskId, { worker_id: 'test-worker' });
@@ -51,12 +51,12 @@ const { logAudit } = require('../utils/auditLogger');
       )
     ).rows;
 
-    console.log('\n📋 Audit entries for test task:');
+    logger.info('\n📋 Audit entries for test task:');
     console.table(rows);
 
-    console.log('\nAudit test completed successfully.');
+    logger.info('\nAudit test completed successfully.');
   } catch (err) {
-    console.error('Test failed:', err.message || err);
+    logger.error('Test failed:', err.message || err);
   } finally {
     await pool.end();
   }

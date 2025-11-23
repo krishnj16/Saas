@@ -1,118 +1,279 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const cookieParser = require('cookie-parser');
-const http = require('http');
-const Sentry = require('./services/sentry');
-const logger = require('./services/logger');
-require('./services/config');
-const { initSockets } = require('./sockets');
+// require("dotenv").config();
+// const express = require("express");
+// const cors = require("cors");
+// const helmet = require("helmet");
+// const cookieParser = require("cookie-parser");
+// const http = require("http");
+// const { v4: uuidv4 } = require("uuid");
 
+// // Safe logger
+// let logger = console;
+// try {
+//   logger = require("./services/logger");
+// } catch (e) {}
 
-const { env, port, corsOrigin } = require('./configs/env');
+// const config = require("./services/config");
+// const csrfDoubleSubmit = require("./middleware/csrfDoubleSubmit");
 
-const discoveryRoutes = require('./routes/discovery');
-const malwareRoutes = require('./routes/malwareRoutes');
-const notifRouter = require('./routes/notifications');
-const websitesRouter = require('./routes/websites');
-const authRoutes = require('./routes/auth.routes');
-const routes = require('./routes');
+// // -------- SAFE REQUIRE --------
+// function safeRequire(path) {
+//   try {
+//     const mod = require(path);
+//     logger.info(`[index] loaded ${path}`);
+//     return mod;
+//   } catch (err) {
+//     logger.warn(`[index] optional module failed: ${path} — ${err.message}`);
+//     return null;
+//   }
+// }
 
-const notFound = require('./middleware/notFound');
-const errorHandler = require('./middleware/errorHandler');
-const app = express();
-console.log('ENV JWT_SECRET (server) =', process.env.JWT_SECRET || '(not set)');
+// // -------- SAFE MOUNT --------
+// function safeMount(app, basePath, routerObj) {
+//   if (!routerObj) {
+//     logger.info(`[index] skipping mount ${basePath} (missing router)`);
+//     return;
+//   }
 
-if (Sentry && Sentry.Handlers?.requestHandler) {
-  app.use(Sentry.Handlers.requestHandler());
-} else {
-  console.log('[Sentry] Disabled or DSN missing.');
+//   if (typeof basePath !== "string" || !basePath.startsWith("/")) {
+//     logger.error(`[index] unsafe basePath detected: ${basePath}`);
+//     return;
+//   }
+
+//   const looksLikeRouter =
+//     typeof routerObj === "function" ||
+//     (routerObj && (routerObj.stack || routerObj.handle));
+
+//   if (!looksLikeRouter) {
+//     logger.error(
+//       `[index] not an express router — refusing mount ${basePath}`
+//     );
+//     return;
+//   }
+
+//   try {
+//     app.use(basePath, routerObj);
+//     logger.info(`[index] mounted ${basePath}`);
+//   } catch (err) {
+//     logger.error(`[index] FAILED to mount ${basePath}: ${err.message}`);
+//   }
+// }
+
+// // -------- IMPORT ROUTES --------
+// const authRoutes = safeRequire("./routes/auth.routes");
+// const websitesRouter = safeRequire("./routes/websites");
+// const findingsRouter = safeRequire("./routes/findings");
+
+// // Optional routes
+// const discoveryRoutes = safeRequire("./routes/discovery");
+// const malwareRoutes = safeRequire("./routes/malwareRoutes");
+// const notifRouter = safeRequire("./routes/notifications");
+// const sitesRouter = safeRequire("./routes/sites");
+
+// const notFound = require("./middleware/notFound");
+// const errorHandler = require("./middleware/errorHandler");
+
+// // -------- CREATE APP --------
+// const app = express();
+
+// // Request ID
+// app.use((req, res, next) => {
+//   req.id = uuidv4();
+//   res.setHeader("X-Request-ID", req.id);
+//   next();
+// });
+
+// // Security
+// app.use(
+//   helmet({
+//     contentSecurityPolicy: false,
+//   })
+// );
+
+// // CORS
+// app.use(
+//   cors({
+//     origin: config.CLIENT_ORIGIN || "http://localhost:5173",
+//     credentials: true,
+//   })
+// );
+
+// // Body
+// app.use(express.json());
+// app.use(express.urlencoded({ extended: true }));
+// app.use(cookieParser());
+
+// // Health routes BEFORE CSRF
+// app.get("/health", (req, res) => res.json({ status: "ok" }));
+// app.get("/__ping", (req, res) => res.json({ ok: true }));
+
+// // CSRF
+// app.use(csrfDoubleSubmit());
+
+// // -------- MOUNT ROUTES SAFELY --------
+// safeMount(app, "/api/auth", authRoutes);
+// safeMount(app, "/api/websites", websitesRouter);
+// safeMount(app, "/api/findings", findingsRouter);
+
+// safeMount(app, "/api/discovery", discoveryRoutes);
+// safeMount(app, "/api/malware", malwareRoutes);
+// safeMount(app, "/api/notifications", notifRouter);
+// safeMount(app, "/api/sites", sitesRouter);
+
+// // API 404
+// app.use("/api/*", (req, res) =>
+//   res.status(404).json({ error: "API endpoint not found" })
+// );
+
+// // Error handlers
+// app.use(notFound);
+// app.use(errorHandler);
+
+// const server = http.createServer(app);
+
+// module.exports = app;
+// module.exports.server = server;
+
+// if (require.main === module && process.env.NODE_ENV !== "test") {
+//   const PORT = process.env.PORT || 4000;
+//   server.listen(PORT, () => console.log(`Server listening on ${PORT}`));
+// }
+require("dotenv").config();
+const express = require("express");
+const cors = require("cors");
+const helmet = require("helmet");
+const cookieParser = require("cookie-parser");
+const http = require("http");
+const { v4: uuidv4 } = require("uuid");
+
+// Safe logger
+let logger = console;
+try {
+  logger = require("./services/logger");
+} catch (e) {}
+
+const config = require("./services/config");
+const csrfDoubleSubmit = require("./middleware/csrfDoubleSubmit");
+
+// -------- SAFE REQUIRE --------
+function safeRequire(path) {
+  try {
+    const mod = require(path);
+    logger.info(`[index] loaded ${path}`);
+    return mod;
+  } catch (err) {
+    logger.warn(`[index] optional module failed: ${path} — ${err.message}`);
+    return null;
+  }
 }
-app.use(
-  helmet({
-    contentSecurityPolicy: {
-      useDefaults: true,
-      directives: {
-        "default-src": ["'self'"],
-        "script-src": ["'self'"],
-      },
-    },
-  })
-);
-app.use(helmet.hsts({ maxAge: 31536000, includeSubDomains: true, preload: true }));
-app.disable('x-powered-by');
 
-app.use(cors({ origin: corsOrigin || 'http://localhost:5173', credentials: true }));
-app.use(express.json({ limit: '1mb' }));
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
-app.use('/api/auth', authRoutes);
-app.use('/api/discovery', discoveryRoutes);
-app.use('/api/malware', malwareRoutes);
-app.use('/api/notifications', notifRouter);
-app.use('/api/websites', websitesRouter);  
-app.use('/', routes);
-
-app.post('/__test_body', (req, res) => {
-  res.json({
-    ok: true,
-    body: req.body,
-    headers: {
-      authorization: req.headers.authorization || null,
-      'content-type': req.headers['content-type'] || null,
-    },
-  });
-});
-
-(function safeListRoutes(a) {
-  if (!a || !a._router || !Array.isArray(a._router.stack)) {
-    console.log('DEBUG: app._router not ready yet — no routes to list.');
+// -------- SAFE MOUNT --------
+function safeMount(app, basePath, routerObj) {
+  if (!routerObj) {
+    logger.info(`[index] skipping mount ${basePath} (missing router)`);
     return;
   }
-  console.log(' REGISTERED ROUTES ');
-  a._router.stack.forEach(layer => {
-    if (layer.route?.path) {
-      const methods = Object.keys(layer.route.methods)
-        .map(m => m.toUpperCase())
-        .join(',');
-      console.log(`${methods} ${layer.route.path}`);
-    } else if (layer.name === 'router' && layer.handle?.stack) {
-      layer.handle.stack.forEach(r => {
-        if (r.route?.path) {
-          const methods = Object.keys(r.route.methods)
-            .map(m => m.toUpperCase())
-            .join(',');
-          console.log(`${methods} ${r.route.path}`);
-        }
-      });
-    }
-  });
-  console.log(' END ROUTES ');
-})(app);
 
-app.use(notFound);
-if (Sentry && Sentry.Handlers?.errorHandler) {
-  app.use(Sentry.Handlers.errorHandler());
-}
-app.use(errorHandler);
-
-const httpServer = http.createServer(app);
-let io = null;
-try {
-  if (typeof initSockets === 'function') {
-    io = initSockets(httpServer, { corsOrigin: process.env.CLIENT_ORIGIN || '*' });
-    logger.info('Socket.IO initialized via backend/sockets');
-  } else {
-    logger.warn('initSockets not a function - skipping sockets init');
+  if (typeof basePath !== "string" || !basePath.startsWith("/")) {
+    logger.error(`[index] unsafe basePath detected: ${basePath}`);
+    return;
   }
-} catch (err) {
-  logger.warn('Could not initialize sockets (./sockets):', err.message);
+
+  const looksLikeRouter =
+    typeof routerObj === "function" ||
+    (routerObj && (routerObj.stack || routerObj.handle));
+
+  if (!looksLikeRouter) {
+    logger.error(
+      `[index] not an express router — refusing mount ${basePath}`
+    );
+    return;
+  }
+
+  try {
+    app.use(basePath, routerObj);
+    logger.info(`[index] mounted ${basePath}`);
+  } catch (err) {
+    logger.error(`[index] FAILED to mount ${basePath}: ${err.message}`);
+  }
 }
 
-const PORT = port || process.env.PORT || 4000;
-httpServer.listen(PORT, () => {
-  logger.info(`Server listening on ${PORT} (${env || process.env.NODE_ENV || 'unknown'} mode)`);
+// -------- IMPORT ROUTES --------
+const authRoutes = safeRequire("./routes/auth.routes");
+const websitesRouter = safeRequire("./routes/websites");
+const findingsRouter = safeRequire("./routes/findings");
+
+// Optional routes
+const discoveryRoutes = safeRequire("./routes/discovery");
+const malwareRoutes = safeRequire("./routes/malwareRoutes");
+const notifRouter = safeRequire("./routes/notifications");
+const sitesRouter = safeRequire("./routes/sites");
+
+const notFound = require("./middleware/notFound");
+const errorHandler = require("./middleware/errorHandler");
+
+// -------- CREATE APP --------
+const app = express();
+
+// Request ID
+app.use((req, res, next) => {
+  req.id = uuidv4();
+  res.setHeader("X-Request-ID", req.id);
+  next();
 });
 
-module.exports = { app, httpServer, io };
+// Security
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+  })
+);
+
+// CORS
+app.use(
+  cors({
+    origin: config.CLIENT_ORIGIN || "http://localhost:5173",
+    credentials: true,
+  })
+);
+
+// Body
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+// Health routes BEFORE CSRF
+app.get("/health", (req, res) => res.json({ status: "ok" }));
+app.get("/__ping", (req, res) => res.json({ ok: true }));
+
+// CSRF
+app.use(csrfDoubleSubmit());
+
+// -------- MOUNT ROUTES SAFELY --------
+safeMount(app, "/api/auth", authRoutes);
+safeMount(app, "/api/websites", websitesRouter);
+safeMount(app, "/api/findings", findingsRouter);
+
+safeMount(app, "/api/discovery", discoveryRoutes);
+safeMount(app, "/api/malware", malwareRoutes);
+safeMount(app, "/api/notifications", notifRouter);
+safeMount(app, "/api/sites", sitesRouter);
+
+// API 404 - FIX APPLIED BELOW
+// Using "/api" instead of "/api/*" because app.use matches prefixes automatically.
+app.use("/api", (req, res) =>
+  res.status(404).json({ error: "API endpoint not found" })
+);
+
+// Error handlers
+app.use(notFound);
+app.use(errorHandler);
+
+const server = http.createServer(app);
+
+module.exports = app;
+module.exports.server = server;
+
+if (require.main === module && process.env.NODE_ENV !== "test") {
+  const PORT = process.env.PORT || 4000;
+  server.listen(PORT, () => console.log(`Server listening on ${PORT}`));
+}

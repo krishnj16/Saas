@@ -12,10 +12,10 @@ async function run() {
       const existsRes = await client.query(`SELECT 1 FROM information_schema.tables WHERE table_name = $1 LIMIT 1`, [t]);
       const exists = existsRes.rowCount > 0;
       const countRes = exists ? await client.query(`SELECT count(*) AS c FROM ${t}`) : { rows: [{ c: 0 }] };
-      console.log(`${t}: exists=${exists} rows=${countRes.rows[0].c}`);
+      logger.info(`${t}: exists=${exists} rows=${countRes.rows[0].c}`);
     }
   } catch (err) {
-    console.error('check failed', err);
+    logger.error('check failed', err);
   } finally {
     try { client.release(); } catch (e) {}
     try { await pool.end(); } catch (e) {}

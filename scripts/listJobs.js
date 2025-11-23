@@ -16,13 +16,13 @@ require('dotenv').config();
     const completed = await q.getCompleted();
     const failed = await q.getFailed();
 
-    console.log('--- Jobs in scanQueue ---');
-    console.log('Waiting:', waiting.map(j => ({ id: j.id, data: j.data })));
-    console.log('Active:', active.map(j => ({ id: j.id, data: j.data })));
-    console.log('Completed:', completed.map(j => ({ id: j.id, data: j.data })));
-    console.log('Failed:', failed.map(j => ({ id: j.id, data: j.data })));
+    logger.info('--- Jobs in scanQueue ---');
+    logger.info('Waiting:', waiting.map(j => ({ id: j.id, data: j.data })));
+    logger.info('Active:', active.map(j => ({ id: j.id, data: j.data })));
+    logger.info('Completed:', completed.map(j => ({ id: j.id, data: j.data })));
+    logger.info('Failed:', failed.map(j => ({ id: j.id, data: j.data })));
   } catch (err) {
-    console.error('Error listing jobs:', err);
+    logger.error('Error listing jobs:', err);
   } finally {
     await q.close();
     process.exit(0);

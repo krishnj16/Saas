@@ -27,7 +27,7 @@ try {
   Worker = bull && bull.Worker ? bull.Worker : require('bullmq').Worker;
   QueueScheduler = bull && bull.QueueScheduler ? bull.QueueScheduler : (require('bullmq').QueueScheduler || null);
 } catch (e) {
-  try { Worker = require('bullmq').Worker; } catch (err) { console.error('[worker] bullmq missing - npm install --prefix . bullmq ioredis'); process.exit(1); }
+  try { Worker = require('bullmq').Worker; } catch (err) { logger.error('[worker] bullmq missing - npm install --prefix . bullmq ioredis'); process.exit(1); }
 }
 
 const pool = require('../utils/db');
@@ -38,18 +38,18 @@ try {
   const auditMod = require('../utils/auditLogger');
   if (auditMod && typeof auditMod.logAudit === 'function') logAudit = auditMod.logAudit;
 } catch (e) {
-  console.warn('[worker] auditLogger not available, continuing without audit logs');
+  logger.warn('[worker] auditLogger not available, continuing without audit logs');
 }
 
 let discoveryWorker = null;
 try {
   discoveryWorker = require('./discoveryWorker'); 
   if (!discoveryWorker || typeof discoveryWorker.discoverForScanTask !== 'function') {
-    console.warn('[worker] discoveryWorker found but does not export discoverForScanTask');
+    logger.warn('[worker] discoveryWorker found but does not export discoverForScanTask');
     discoveryWorker = null;
   }
 } catch (e) {
-  console.warn('[worker] discoveryWorker not present - discovery disabled for now');
+  logger.warn('[worker] discoveryWorker not present - discovery disabled for now');
   discoveryWorker = null;
 }
 
@@ -57,17 +57,17 @@ let injector = null;
 try {
   injector = require('../injector/injector'); 
   if (!injector || typeof injector.runInjectionForScan !== 'function') {
-    console.warn('[worker] injector found but does not export runInjectionForScan');
+    logger.warn('[worker] injector found but does not export runInjectionForScan');
     injector = null;
   }
 } catch (e) {
-  console.warn('[worker] injector not present - injection disabled for now');
+  logger.warn('[worker] injector not present - injection disabled for now');
   injector = null;
 }
 
 const QUEUE_NAME = process.env.SCAN_QUEUE_NAME || 'scanQueue';
 const connection = process.env.REDIS_URL ? { connectionString: process.env.REDIS_URL } : { host: process.env.REDIS_HOST || '127.0.0.1', port: process.env.REDIS_PORT ? Number(process.env.REDIS_PORT) : 6379 };
-const log = (...a) => console.log(new Date().toISOString(), ...a);
+const log = (...a) => logger.info(new Date().toISOString(), ...a);
 
 let scheduler = null;
 if (QueueScheduler) {
@@ -322,7 +322,7 @@ async function linkMalwareToVulnerability(malwareResultIdOrSha, vulnId) {
     );
     log('[worker] Linked malware_result', malwareResultId, 'to vulnerability', vulnId);
   } catch (e) {
-    console.error('[worker] Failed to link malware result to vulnerability', e?.message || e);
+    logger.error('[worker] Failed to link malware result to vulnerability', e?.message || e);
   }
 }
 async function handleDownloadedFile(url, scanTaskId /* uuid */, vulnId /* maybe null */) {
@@ -335,14 +335,14 @@ async function handleDownloadedFile(url, scanTaskId /* uuid */, vulnId /* maybe 
     totalBytes = result.totalBytes;
     contentType = result.contentType;
   } catch (err) {
-    console.error('[scanWorker] downloadAndHash failed for', url, err?.message || err);
+    logger.error('[scanWorker] downloadAndHash failed for', url, err?.message || err);
     throw err;
   }
 
   try {
     const cached = await getCachedResult(sha256);
     if (cached) {
-      console.log(`[scanWorker] VT cache hit for ${sha256} — skipping queue`);
+      logger.info(`[scanWorker] VT cache hit for ${sha256} — skipping queue`);
       if (vulnId && cached.id) {
         await linkMalwareToVulnerability(cached.id, vulnId);
       }
@@ -354,16 +354,16 @@ async function handleDownloadedFile(url, scanTaskId /* uuid */, vulnId /* maybe 
           related_vuln_id: vulnId || null,
           file_path: tmpFilePath || null
         });
-        console.log(`[scanWorker] enqueued VT job for ${sha256}`);
+        logger.info(`[scanWorker] enqueued VT job for ${sha256}`);
       } catch (e) {
-        console.warn('[scanWorker] enqueueVTJob failed or duplicate:', e?.message || e);
+        logger.warn('[scanWorker] enqueueVTJob failed or duplicate:', e?.message || e);
       }
     }
   } finally {
     try {
       await cleanupFile(tmpFilePath, tmpDir);
     } catch (e) {
-      console.warn('[scanWorker] cleanupFile failed:', e?.message || e);
+      logger.warn('[scanWorker] cleanupFile failed:', e?.message || e);
     }
   }
 
@@ -403,7 +403,7 @@ async function stopWorker() {
       backgroundWorker = null;
     }
   } catch (e) {
-    console.warn('[worker] error closing backgroundWorker', e?.message || e);
+    logger.warn('[worker] error closing backgroundWorker', e?.message || e);
   }
 
   try {
@@ -415,7 +415,7 @@ async function stopWorker() {
       backgroundScheduler = null;
     }
   } catch (e) {
-    console.warn('[worker] error closing backgroundScheduler', e?.message || e);
+    logger.warn('[worker] error closing backgroundScheduler', e?.message || e);
   }
 }
 
@@ -425,7 +425,7 @@ if (require.main === module) {
       await startWorker();
       log('[worker] started (pid=' + process.pid + ')');
     } catch (e) {
-      console.error('[worker] start failed', e?.message || e);
+      logger.error('[worker] start failed', e?.message || e);
       process.exit(1);
     }
   })();

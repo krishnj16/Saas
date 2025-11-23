@@ -12,15 +12,15 @@ const pool = require('../utils/db');
     `);
 
     if (rows.length === 0) {
-      console.log('  No discoveries found. Try running:');
-      console.log('   node scripts/run_discovery_debug.js https://example.com');
+      logger.info('  No discoveries found. Try running:');
+      logger.info('   node scripts/run_discovery_debug.js https://example.com');
       return;
     }
 
-    console.log(' Showing latest discovered inputs:');
+    logger.info(' Showing latest discovered inputs:');
     console.table(rows);
   } catch (err) {
-    console.error(' Error fetching discoveries:', err.message);
+    logger.error(' Error fetching discoveries:', err.message);
   } finally {
     pool.end();
   }

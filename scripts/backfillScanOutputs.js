@@ -36,7 +36,7 @@ async function backfill(limit = 1000) {
   const client = await pool.connect();
   try {
     const rows = (await client.query('SELECT * FROM scan_outputs ORDER BY id ASC LIMIT $1', [limit])).rows;
-    console.log('Found', rows.length, 'scan_outputs to process');
+    logger.info('Found', rows.length, 'scan_outputs to process');
     for (const r of rows) {
       const scanTaskId = r.scan_task_id;
       const scannerName = r.scanner_name;
@@ -49,10 +49,10 @@ async function backfill(limit = 1000) {
           await persistVulnerability(client, scanTaskId, v);
         }
         await client.query('COMMIT');
-        console.log(`Backfilled scan_output id=${r.id} -> ${vulns.length} vulnerabilities`);
+        logger.info(`Backfilled scan_output id=${r.id} -> ${vulns.length} vulnerabilities`);
       } catch (err) {
         await client.query('ROLLBACK');
-        console.error('Failed to persist for scan_output id=', r.id, err);
+        logger.error('Failed to persist for scan_output id=', r.id, err);
       }
     }
   } finally {
@@ -63,7 +63,7 @@ async function backfill(limit = 1000) {
 if (require.main === module) {
   const arg = process.argv[2];
   const limit = arg ? parseInt(arg, 10) : 1000;
-  backfill(limit).then(()=>{ console.log('done backfill'); process.exit(0); }).catch(err=>{ console.error(err); process.exit(1); });
+  backfill(limit).then(()=>{ logger.info('done backfill'); process.exit(0); }).catch(err=>{ logger.error(err); process.exit(1); });
 }
 
 module.exports = { backfill };

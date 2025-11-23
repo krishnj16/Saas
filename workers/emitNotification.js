@@ -1,6 +1,8 @@
+// backend/workers/emitNotification.js
 const pool = require('../utils/db');
 const { createNotification } = require('../models/notifications');
 const { TYPE, SEVERITY } = require('../constants/notifications');
+const logger = require('../services/logger');
 
 async function isMuted(site_id, severity) {
   const now = new Date().toISOString();
@@ -29,7 +31,7 @@ async function getUserEffectiveSettings(user_id, site_id) {
 
 async function emitEventNotification({ site_id = null, user_id_list = [], type, severity, title, body, metadata = {} , sendEmailFn = null}) {
   if (await isMuted(site_id, severity)) {
-    console.info('muted notification for', site_id, severity);
+    logger.info('muted notification', { site_id, severity });
     return;
   }
 
@@ -46,7 +48,7 @@ async function emitEventNotification({ site_id = null, user_id_list = [], type, 
       try {
         await sendEmailFn(uid, { title, body, severity, metadata });
       } catch (e) {
-        console.error('email send failed for user', uid, e);
+        logger.error('email send failed for user', { userId: uid, error: e });
       }
     }
   }

@@ -1,3 +1,4 @@
+const logger = require('../services/logger');
 require('dotenv').config();
 const { Queue } = require('bullmq');
 const pool = require('../utils/db'); 
@@ -38,7 +39,7 @@ async function addScanTaskJob({ websiteId, requestedBy = 'dev@local', options = 
   const meta = { requestedBy, options };
   const inserted = await createScanTaskRow(websiteId, meta);
   const scanTaskId = inserted.id;
-  console.log('Created scan_tasks row id=', scanTaskId);
+  logger.info('Created scan_tasks row id=', scanTaskId);
 
 
   const jobData = {
@@ -55,13 +56,13 @@ async function addScanTaskJob({ websiteId, requestedBy = 'dev@local', options = 
     backoff: { type: 'exponential', delay: 5000 },
   });
 
-  console.log('Enqueued job id=', job.id, 'for scanTaskId=', scanTaskId);
+  logger.info('Enqueued job id=', job.id, 'for scanTaskId=', scanTaskId);
 
   try {
     await updateScanTask(scanTaskId, { queue_job_id: String(job.id) });
-    console.log('Updated scan_tasks.queue_job_id for', scanTaskId);
+    logger.info('Updated scan_tasks.queue_job_id for', scanTaskId);
   } catch (err) {
-    console.error('Failed to update scan_tasks with queue_job_id:', err.message || err);
+    logger.error('Failed to update scan_tasks with queue_job_id:', err.message || err);
   }
 
   return { scanTaskId, jobId: job.id };
@@ -76,13 +77,13 @@ if (require.main === module) {
       }
 
       const res = await addScanTaskJob({ websiteId, requestedBy: 'dev@local', options: { depth: 1 } });
-      console.log('Done:', res);
+      logger.info('Done:', res);
 
       await queue.close();
       if (pool && pool.end) await pool.end();
       process.exit(0);
     } catch (err) {
-      console.error('enqueue error', err.message || err);
+      logger.error('enqueue error', err.message || err);
       try { await queue.close(); } catch (e) {}
       try { if (pool && pool.end) await pool.end(); } catch (e) {}
       process.exit(1);

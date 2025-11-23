@@ -1,3 +1,4 @@
+const logger = require('../services/logger');
 const express = require('express');
 const router = express.Router();
 const pool = require('../utils/db');
@@ -13,7 +14,7 @@ router.post('/mute', async (req, res) => {
     const { rows } = await pool.query(q, params);
     res.json({ created: rows[0] });
   } catch (err) {
-    console.error('POST /admin/mute', err);
+    logger.error('POST /admin/mute', err);
     res.status(500).json({ error: 'internal_error' });
   }
 });
@@ -24,7 +25,7 @@ router.get('/mutes', async (req, res) => {
     const { rows } = await pool.query('SELECT * FROM admin_mutes ORDER BY created_at DESC LIMIT 500');
     res.json(rows);
   } catch (err) {
-    console.error('GET /admin/mutes', err);
+    logger.error('GET /admin/mutes', err);
     res.status(500).json({ error: 'internal_error' });
   }
 });

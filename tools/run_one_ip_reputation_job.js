@@ -9,18 +9,18 @@ const pool = new Pool({
 async function runOne() {
   const client = await pool.connect();
   try {
-    console.log('[ipReputation] Fetching one pending job...');
+    logger.info('[ipReputation] Fetching one pending job...');
     const res = await client.query(
       `SELECT * FROM ip_reputation_queue WHERE status='pending' ORDER BY id ASC LIMIT 1`
     );
 
     if (res.rowCount === 0) {
-      console.log('No pending jobs found.');
+      logger.info('No pending jobs found.');
       return;
     }
 
     const job = res.rows[0];
-    console.log(`[ipReputation] Processing job id=${job.id}, ip=${job.ip}, provider=${job.provider}`);
+    logger.info(`[ipReputation] Processing job id=${job.id}, ip=${job.ip}, provider=${job.provider}`);
 
     await client.query(
       `UPDATE ip_reputation_queue SET status='processing', attempts = attempts + 1 WHERE id=$1`,
@@ -34,13 +34,13 @@ async function runOne() {
       [job.id]
     );
 
-    console.log(
+    logger.info(
       `[ipReputation] Done — ip=${job.ip} score=${result?.result?.score ?? 'n/a'} cached=${
         result.cached ? 'yes' : 'no'
       }`
     );
   } catch (err) {
-    console.error('[ipReputation] Error:', err);
+    logger.error('[ipReputation] Error:', err);
   } finally {
     client.release();
     await pool.end();

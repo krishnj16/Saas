@@ -15,7 +15,7 @@
     console.table(res.rows);
     await pool.end();
   } catch (err) {
-    console.error('ERROR:', err.message || err);
+    logger.error('ERROR:', err.message || err);
     process.exit(1);
   }
 })();

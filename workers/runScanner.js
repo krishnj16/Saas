@@ -1,3 +1,4 @@
+const logger = require('../services/logger');
 const { exec } = require('child_process');
 const { saveScanOutput } = require('./saveScanOutput');
 
@@ -10,7 +11,7 @@ function runScanner({ scanTaskId, scannerName, cmd, maxBuffer = 20 * 1024 * 1024
       try {
         await saveScanOutput({ scanTaskId, scannerName, rawText });
       } catch (saveErr) {
-        console.error('[runScanner] failed to save scan output:', saveErr);
+        logger.error('[runScanner] failed to save scan output:', saveErr);
       }
 
       if (error) {

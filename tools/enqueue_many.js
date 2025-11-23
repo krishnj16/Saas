@@ -5,8 +5,8 @@ async function main() {
   for (let i = 0; i < N; i++) {
     await enqueueJob({ type: 'test', idx: i, createdAt: Date.now() });
   }
-  console.log(`Enqueued ${N} test jobs`);
+  logger.info(`Enqueued ${N} test jobs`);
   process.exit(0);
 }
 
-main().catch(err => { console.error(err); process.exit(1); });
+main().catch(err => { logger.error(err); process.exit(1); });

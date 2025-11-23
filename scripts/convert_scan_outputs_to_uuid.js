@@ -15,24 +15,24 @@ async function getQuery() {
 async function convert() {
   const query = await getQuery();
 
-  console.log('--- Starting UUID migration for scan_outputs.scan_task_id ---');
+  logger.info('--- Starting UUID migration for scan_outputs.scan_task_id ---');
 
-  console.log('1️ Create pgcrypto extension (needed for gen_random_uuid)');
+  logger.info('1️ Create pgcrypto extension (needed for gen_random_uuid)');
   await query(`CREATE EXTENSION IF NOT EXISTS "pgcrypto";`);
 
-  console.log('2️ Add temporary UUID column');
+  logger.info('2️ Add temporary UUID column');
   await query(`ALTER TABLE scan_outputs ADD COLUMN IF NOT EXISTS scan_task_id_uuid uuid;`);
 
-  console.log('3️ Fill new column with UUIDs where null');
+  logger.info('3️ Fill new column with UUIDs where null');
   await query(`UPDATE scan_outputs SET scan_task_id_uuid = gen_random_uuid() WHERE scan_task_id_uuid IS NULL;`);
 
-  console.log('4️ Drop old integer column');
+  logger.info('4️ Drop old integer column');
   await query(`ALTER TABLE scan_outputs DROP COLUMN IF EXISTS scan_task_id;`);
 
-  console.log('5️ Rename new column');
+  logger.info('5️ Rename new column');
   await query(`ALTER TABLE scan_outputs RENAME COLUMN scan_task_id_uuid TO scan_task_id;`);
 
-  console.log('6️ Confirm new column type');
+  logger.info('6️ Confirm new column type');
   const res = await query(`
     SELECT data_type
     FROM information_schema.columns
@@ -41,13 +41,13 @@ async function convert() {
       AND column_name='scan_task_id'
     LIMIT 1;
   `);
-  console.log('   New type:', res.rows?.[0]?.data_type);
+  logger.info('   New type:', res.rows?.[0]?.data_type);
 
-  console.log(' Done! scan_outputs.scan_task_id is now UUID type.');
+  logger.info(' Done! scan_outputs.scan_task_id is now UUID type.');
   process.exit(0);
 }
 
 convert().catch(err => {
-  console.error(' Migration failed:', err);
+  logger.error(' Migration failed:', err);
   process.exit(1);
 });

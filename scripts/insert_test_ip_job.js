@@ -32,15 +32,15 @@ async function run() {
          VALUES ($1,$2,$3,$4,'pending',0, now())`,
         [scanId, hostId, ip, provider]
       );
-      console.log('Inserted test job for', ip);
+      logger.info('Inserted test job for', ip);
     } else {
-      console.log('A pending/processing job already exists for', ip, '- not enqueuing again.');
+      logger.info('A pending/processing job already exists for', ip, '- not enqueuing again.');
     }
 
     await client.query('COMMIT');
   } catch (err) {
     await client.query('ROLLBACK').catch(()=>{});
-    console.error('insert failed', err);
+    logger.error('insert failed', err);
   } finally {
     try { client.release(); } catch (e) {}
     try { await pool.end(); } catch (e) {}

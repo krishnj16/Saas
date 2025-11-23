@@ -1,6 +1,6 @@
 const { Pool } = require('pg');
 require('dotenv').config();
-console.log('DEBUG DB ENV:', {
+logger.info('DEBUG DB ENV:', {
   host: process.env.PGHOST,
   port: process.env.PGPORT,
   user: process.env.PGUSER,

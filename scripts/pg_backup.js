@@ -38,9 +38,9 @@ const { Client } = require('pg');
     if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
     const filePath = path.join(backupDir, `saasdb_${timestamp}.json`);
     fs.writeFileSync(filePath, JSON.stringify(backup, null, 2));
-    console.log('Backup saved to', filePath);
+    logger.info('Backup saved to', filePath);
   } catch (err) {
-    console.error('Backup failed:', err.message);
+    logger.error('Backup failed:', err.message);
   } finally {
     await client.end();
   }

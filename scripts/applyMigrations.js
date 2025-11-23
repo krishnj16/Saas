@@ -20,7 +20,7 @@ async function main() {
   for (const f of files) {
     const p = path.join(migrationsDir, f);
     if (!fs.existsSync(p)) {
-      console.error('Migration file not found:', p);
+      logger.error('Migration file not found:', p);
       process.exit(1);
     }
   }
@@ -32,13 +32,13 @@ async function main() {
       const client = await db.pool.connect();
       try {
         for (const sql of sqls) {
-          console.log('Applying migration chunk (via pool)...');
+          logger.info('Applying migration chunk (via pool)...');
           await client.query(sql);
         }
       } finally {
         client.release();
       }
-      console.log('Migrations applied (via pool).');
+      logger.info('Migrations applied (via pool).');
       process.exit(0);
     }
     if (db && typeof db.getClient === 'function') {
@@ -50,7 +50,7 @@ async function main() {
       } finally {
         if (typeof client.release === 'function') client.release();
       }
-      console.log('Migrations applied (via getClient).');
+      logger.info('Migrations applied (via getClient).');
       process.exit(0);
     }
 
@@ -58,7 +58,7 @@ async function main() {
       for (const sql of sqls) {
         await db.client.query(sql);
       }
-      console.log('Migrations applied (via db.client).');
+      logger.info('Migrations applied (via db.client).');
       process.exit(0);
     }
 
@@ -66,13 +66,13 @@ async function main() {
       for (const sql of sqls) {
         await db.query(sql);
       }
-      console.log('Migrations applied (via db.query).');
+      logger.info('Migrations applied (via db.query).');
       process.exit(0);
     }
 
     throw new Error('Unsupported db export shape from backend/utils/db.js. Expected .pool, .getClient(), .client or .query(). Paste backend/utils/db.js here if you need help.');
   } catch (err) {
-    console.error('Error applying migrations:', err);
+    logger.error('Error applying migrations:', err);
     process.exit(1);
   }
 }

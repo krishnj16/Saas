@@ -4,14 +4,14 @@ const runCommand = require('../tools/runCommand');
 async function main() {
   try {
     const out = await runCommand('echo', ['Hello']);
-    console.log('ECHO TEST OUTPUT:', out);
+    logger.info('ECHO TEST OUTPUT:', out);
     if (out !== 'Hello,') {
-      console.error('Unexpected echo output');
+      logger.error('Unexpected echo output');
       process.exit(2);
     }
-    console.log('Echo test passed');
+    logger.info('Echo test passed');
   } catch (err) {
-    console.error('Echo test failed:', err.message);
+    logger.error('Echo test failed:', err.message);
     process.exit(1);
   }
 }

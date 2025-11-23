@@ -14,10 +14,10 @@ async function main() {
 
   await new Promise((resolve, reject) => server.listen(0, (err) => (err ? reject(err) : resolve())));
   const port = server.address().port;
-  console.log('Temporary test server listening on port', port);
+  logger.info('Temporary test server listening on port', port);
 
   const io = initSockets(server, { corsOrigin: '*' });
-  console.log('Socket.IO initialized for test script');
+  logger.info('Socket.IO initialized for test script');
 
   await new Promise(r => setTimeout(r, 200));
 
@@ -56,14 +56,14 @@ async function main() {
     summary: 'Finished. 1 critical found.',
   });
 
-  console.log('test emits done');
+  logger.info('test emits done');
   setTimeout(async () => {
     try {
       io.close();
       server.close();
-      console.log('Temporary server and socket.io closed');
+      logger.info('Temporary server and socket.io closed');
     } catch (e) {
-      console.warn('Error closing test server/io', e.message);
+      logger.warn('Error closing test server/io', e.message);
     } finally {
       process.exit(0);
     }
@@ -71,6 +71,6 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error('emit_test_scan failed', err);
+  logger.error('emit_test_scan failed', err);
   process.exit(1);
 });

@@ -18,7 +18,7 @@ if (argv['dry-run']) process.env.DRY_RUN = 'true';
     }
     process.exit(0);
   } catch (err) {
-    console.error('Injector CLI error', err);
+    logger.error('Injector CLI error', err);
     process.exit(1);
   }
 })();

@@ -4,7 +4,7 @@ const pool = require('../utils/db');
 
 (async function() {
   try {
-    console.log('➡️ Creating temp_user_map from user_backup -> users by email...');
+    logger.info('➡️ Creating temp_user_map from user_backup -> users by email...');
     await pool.query('BEGIN');
     await pool.query(`
       CREATE TABLE IF NOT EXISTS temp_user_map (
@@ -23,10 +23,10 @@ const pool = require('../utils/db');
     `);
 
     await pool.query('COMMIT');
-    console.log('✅ temp_user_map populated, rows inserted:', r.rowCount);
+    logger.info('✅ temp_user_map populated, rows inserted:', r.rowCount);
   } catch (err) {
     try { await pool.query('ROLLBACK'); } catch(e) {}
-    console.error('❌ Error creating temp_user_map:', err.message || err);
+    logger.error('❌ Error creating temp_user_map:', err.message || err);
   } finally {
     await pool.end();
   }

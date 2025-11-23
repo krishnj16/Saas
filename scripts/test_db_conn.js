@@ -14,11 +14,11 @@ const pool = new Pool({
 
 (async () => {
   try {
-    console.log('[test_db_conn] Trying to connect to PostgreSQL...');
+    logger.info('[test_db_conn] Trying to connect to PostgreSQL...');
     const res = await pool.query('SELECT NOW() AS now;');
-    console.log(`[] Connected successfully! Current time on DB server: ${res.rows[0].now}`);
+    logger.info(`[] Connected successfully! Current time on DB server: ${res.rows[0].now}`);
   } catch (err) {
-    console.error('[] Database connection failed:', err.message || err);
+    logger.error('[] Database connection failed:', err.message || err);
   } finally {
     await pool.end();
   }

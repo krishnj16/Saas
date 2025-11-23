@@ -16,7 +16,7 @@ module.exports = (socket, next) => {
     };
     return next();
   } catch (err) {
-    console.error('socketAuth error:', err.message);
+    logger.error('socketAuth error:', err.message);
     return next(new Error('Authentication error'));
   }
 };

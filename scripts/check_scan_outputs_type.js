@@ -12,6 +12,6 @@ const db = require('../utils/db');
     FROM information_schema.columns
     WHERE table_name='scan_outputs' AND column_name='scan_task_id';
   `);
-  console.log(res.rows || res);
+  logger.info(res.rows || res);
   process.exit(0);
 })();
