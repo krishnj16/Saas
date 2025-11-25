@@ -1,6 +1,4 @@
-// FIX: Mock MUST be defined before importing app/index
 jest.mock('../../middleware/csrfDoubleSubmit', () => {
-  // The index.js calls csrfDoubleSubmit(), so we mock that factory function
   return jest.fn(() => (req, res, next) => next()); 
 });
 
