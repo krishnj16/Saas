@@ -14,11 +14,9 @@ pnpm-debug.log*
 prisma/dev.db          # if using SQLite for local testing
 prisma/*.sqlite
 prisma/*.sqlite-journal
-# Build artifacts
 dist/
 build/
 coverage/
-# VSCode
 .vscode/
 *.code-workspace
 # OS files
