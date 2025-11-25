@@ -145,7 +145,6 @@ const cookieParser = require("cookie-parser");
 const http = require("http");
 const { v4: uuidv4 } = require("uuid");
 
-// Safe logger
 let logger = console;
 try {
   logger = require("./services/logger");
@@ -154,7 +153,6 @@ try {
 const config = require("./services/config");
 const csrfDoubleSubmit = require("./middleware/csrfDoubleSubmit");
 
-// -------- SAFE REQUIRE --------
 function safeRequire(path) {
   try {
     const mod = require(path);
@@ -166,7 +164,6 @@ function safeRequire(path) {
   }
 }
 
-// -------- SAFE MOUNT --------
 function safeMount(app, basePath, routerObj) {
   if (!routerObj) {
     logger.info(`[index] skipping mount ${basePath} (missing router)`);
@@ -197,38 +194,33 @@ function safeMount(app, basePath, routerObj) {
   }
 }
 
-// -------- IMPORT ROUTES --------
 const authRoutes = safeRequire("./routes/auth.routes");
 const websitesRouter = safeRequire("./routes/websites");
 const findingsRouter = safeRequire("./routes/findings");
-
-// Optional routes
 const discoveryRoutes = safeRequire("./routes/discovery");
 const malwareRoutes = safeRequire("./routes/malwareRoutes");
 const notifRouter = safeRequire("./routes/notifications");
 const sitesRouter = safeRequire("./routes/sites");
 
+const userRoutes = safeRequire("./routes/userRoutes");
+
 const notFound = require("./middleware/notFound");
 const errorHandler = require("./middleware/errorHandler");
 
-// -------- CREATE APP --------
 const app = express();
 
-// Request ID
 app.use((req, res, next) => {
   req.id = uuidv4();
   res.setHeader("X-Request-ID", req.id);
   next();
 });
 
-// Security
 app.use(
   helmet({
     contentSecurityPolicy: false,
   })
 );
 
-// CORS
 app.use(
   cors({
     origin: config.CLIENT_ORIGIN || "http://localhost:5173",
@@ -236,35 +228,29 @@ app.use(
   })
 );
 
-// Body
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Health routes BEFORE CSRF
 app.get("/health", (req, res) => res.json({ status: "ok" }));
 app.get("/__ping", (req, res) => res.json({ ok: true }));
 
-// CSRF
 app.use(csrfDoubleSubmit());
 
-// -------- MOUNT ROUTES SAFELY --------
 safeMount(app, "/api/auth", authRoutes);
 safeMount(app, "/api/websites", websitesRouter);
 safeMount(app, "/api/findings", findingsRouter);
-
 safeMount(app, "/api/discovery", discoveryRoutes);
 safeMount(app, "/api/malware", malwareRoutes);
 safeMount(app, "/api/notifications", notifRouter);
 safeMount(app, "/api/sites", sitesRouter);
 
-// API 404 - FIX APPLIED BELOW
-// Using "/api" instead of "/api/*" because app.use matches prefixes automatically.
+safeMount(app, "/api/users", userRoutes);
+
 app.use("/api", (req, res) =>
   res.status(404).json({ error: "API endpoint not found" })
 );
 
-// Error handlers
 app.use(notFound);
 app.use(errorHandler);
 

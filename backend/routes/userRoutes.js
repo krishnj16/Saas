@@ -1,3 +1,7 @@
+let logger = console;
+try {
+  logger = require("../services/logger");
+} catch (e) {}
 const express = require("express");
 const bcrypt = require('bcryptjs');
 

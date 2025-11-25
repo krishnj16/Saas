@@ -1,47 +1,46 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import { Toaster } from 'react-hot-toast';
 
-import AppShell from './layouts/AppShell'; 
-import Policies from './pages/Policies';
+import PrivateRoute from './routes/PrivateRoute';
+import AdminRoute from './routes/AdminRoute';
 
-import Dashboard from './pages/Dashboard';       
-import Sites from './pages/Sites';               
-import Scans from './pages/Scans';               
-import Findings from './pages/Findings';         
-import FindingDetail from './pages/FindingDetail'; 
-import Auth from './pages/Auth';                 
+// Real Pages
+import LoginPage from './pages/Auth/LoginPage';
+import SignupPage from './pages/Auth/SignupPage';
+import DashboardPage from './pages/Dashboard/DashboardPage';
 
-function ProtectedRoute({ children }) {
-  const token = localStorage.getItem('mock_token');
-  if (!token) return <Navigate to="/auth" replace />;
-  return children;
-}
+// Remaining Placeholders
+const WebsitesList = () => <div className="p-4">Websites Placeholder</div>;
+const UsersList = () => <div className="p-4">Admin Users List Placeholder</div>;
+const NotFound = () => <div className="p-4">404 Not Found</div>;
 
-export default function App() {
+function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        {}
-        <Route path="/auth" element={<Auth />} />
+      <AuthProvider>
+        <Toaster position="top-right" />
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          
+          <Route element={<PrivateRoute />}>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+            
+            <Route path="/websites" element={<WebsitesList />} />
+            
+            <Route element={<AdminRoute />}>
+               <Route path="/admin/users" element={<UsersList />} />
+            </Route>
+          </Route>
 
-        {}
-        <Route path="/*" element={
-          <ProtectedRoute>
-            <AppShell>
-              <Routes>
-                <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/sites" element={<Sites />} />
-                <Route path="/scans" element={<Scans />} />
-                <Route path="/findings" element={<Findings />} />
-                <Route path="/findings/:id" element={<FindingDetail />} />
-                <Route path="/policies" element={<div><h2>Policies</h2></div>} />
-                <Route path="*" element={<div>404 — Page not found</div>} />
-              </Routes>
-            </AppShell>
-          </ProtectedRoute>
-        } />
-      </Routes>
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   );
 }
+
+export default App;

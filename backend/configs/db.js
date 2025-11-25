@@ -1,4 +1,9 @@
-const { Pool } = require('pg');
+let logger = console;
+try {
+  logger = require('../services/logger');
+} catch (e) {
+  
+}const { Pool } = require('pg');
 require('dotenv').config();
 logger.info('DEBUG DB ENV:', {
   host: process.env.PGHOST,
