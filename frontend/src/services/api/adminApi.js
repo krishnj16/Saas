@@ -2,7 +2,7 @@ import httpClient from './httpClient';
 
 export const adminApi = {
   getStats: async () => {
-    const response = await httpClient.get('/user/admin/stats');
+    const response = await httpClient.get('/users/admin/stats');
     return response.data;
   },
 
