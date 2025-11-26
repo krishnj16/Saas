@@ -17,24 +17,20 @@ async function vtGetFileReport(sha256) {
 }
 
 function extractPositives(report) {
-  // Defensive navigation to stats object
   const attrs = (report && report.data && report.data.attributes) || (report && report.attributes) || {};
   const stats = attrs.last_analysis_stats || attrs.last_analysis || {};
 
-  // If malicious + suspicious exist, prefer their sum (covers many VT formats)
   const m = stats.malicious;
   const s = stats.suspicious;
   if (typeof m !== 'undefined' || typeof s !== 'undefined') {
     return (Number(m) || 0) + (Number(s) || 0);
   }
 
-  // Try common numeric keys
   const candidates = ['malicious', 'malicious_count', 'positives', 'positives_count', 'suspicious'];
   for (const key of candidates) {
     if (typeof stats[key] !== 'undefined') return Number(stats[key]) || 0;
   }
 
-  // As fallback, sum all numeric values in stats
   try {
     return Object.values(stats).reduce((acc, v) => acc + (Number(v) || 0), 0);
   } catch (e) {
@@ -51,7 +47,6 @@ async function processJob(job = {}) {
     }
     const sha = job.sha256;
 
-    // Cache path
     if (malwareService && typeof malwareService.getCachedResult === 'function') {
       const cached = await malwareService.getCachedResult(sha);
       if (cached) {
@@ -65,7 +60,6 @@ async function processJob(job = {}) {
       }
     }
 
-    // Query VT
     let report;
     try {
       report = await vtGetFileReport(sha);

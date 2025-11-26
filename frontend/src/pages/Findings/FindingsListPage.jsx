@@ -30,7 +30,7 @@ export default function FindingsListPage() {
   const columns = [
     { header: 'Title', accessor: 'title' },
     { header: 'Severity', render: (row) => getSeverityBadge(row.severity) },
-    { header: 'Website', accessor: 'website' }, // Assuming backend sends website name/url
+    { header: 'Website', accessor: 'website' }, 
     { header: 'Path', accessor: 'path' },
     { 
       header: 'Status', 

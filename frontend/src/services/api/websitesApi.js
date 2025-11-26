@@ -2,8 +2,17 @@ import httpClient from './httpClient';
 
 export const websitesApi = {
   list: async () => {
-    const res = await httpClient.get('/api/sites');
-    return Array.isArray(res.data?.items) ? res.data.items : [];
+    const res = await httpClient.get('/api/websites');
+    
+    if (Array.isArray(res.data)) {
+      return res.data;
+    }
+    
+    if (Array.isArray(res.data?.items)) {
+      return res.data.items;
+    }
+    
+    return [];
   },
 
   create: async (data) => {
@@ -20,5 +29,4 @@ export const websitesApi = {
     const res = await httpClient.get(`/api/websites/${id}`);
     return res.data;
   },
-
 };

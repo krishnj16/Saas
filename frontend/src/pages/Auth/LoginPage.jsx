@@ -23,14 +23,14 @@ export default function LoginPage() {
     setError('');
 
     try {
-      console.log("Attempting login..."); // Debug 1
+      console.log("Attempting login..."); 
       const user = await login(email, password);
-      console.log("Login successful! User data:", user); // Debug 2
+      console.log("Login successful! User data:", user); 
       
       toast.success('Welcome back!');
       window.location.href = '/dashboard';
     } catch (err) {
-      console.error("Login Error Details:", err); // Debug 3
+      console.error("Login Error Details:", err); 
       setError(err.response?.data?.message || 'Failed to login');
     } finally {
       setLoading(false);

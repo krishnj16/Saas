@@ -9,7 +9,6 @@ import { findingsApi } from '../../services/api/findingsApi';
 import { ArrowLeft, Check, Shield } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-// FIX: Added 'default' keyword here
 export default function FindingDetailPage() {
   const { id } = useParams();
   const { data: finding, loading, refetch } = useFetch(() => findingsApi.get(id), [id]);

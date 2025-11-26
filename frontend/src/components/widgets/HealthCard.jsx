@@ -5,12 +5,10 @@ import httpClient from '../../services/api/httpClient';
 import { Loader } from '../ui/Loader';
 
 export function HealthCard() {
-  // FIX: Reverted path to '/health' (Root level, no /api prefix)
   const { data, loading, error } = useFetch(() => httpClient.get('/health').then(r => r.data));
 
   if (loading) return <div className="rounded-lg border border-slate-200 bg-white p-6 flex justify-center"><Loader /></div>;
 
-  // If error (backend down or 404), assume unhealthy
   const isHealthy = data?.status === 'ok';
 
   return (

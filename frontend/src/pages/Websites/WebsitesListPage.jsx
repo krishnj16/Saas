@@ -25,25 +25,20 @@ export default function WebsitesListPage() {
       toast.success('Website added successfully');
       setIsModalOpen(false);
 
-      // Re-fetch the list so UI shows new website immediately
-      // refetch() comes from useFetch
+      
       await refetch();
     } catch (error) {
-      // Friendly handling for duplicate / already exists
       const status = error?.response?.status;
       const data = error?.response?.data || {};
 
-      // Postgres raw insert produced 'detail' containing "already exists"
       const isDuplicateDetail = typeof data.detail === 'string' && data.detail.toLowerCase().includes('already exists');
       const isDuplicateFlag = status === 409 || data?.error === 'duplicate';
 
       if (isDuplicateFlag || isDuplicateDetail) {
         toast.error('This website is already added to your account.');
-        // keep modal open so user can edit or cancel
         return;
       }
 
-      // Generic fallback error
       const message = data?.message || data?.error || 'Failed to add website. Try again.';
       toast.error(message);
       console.error('Create website failed', error);
@@ -55,7 +50,6 @@ export default function WebsitesListPage() {
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this website?')) return;
     try {
-      // if delete endpoint exists in your API, keep this; otherwise remove
       if (typeof websitesApi.delete === 'function') {
         await websitesApi.delete(id);
         toast.success('Website deleted');
@@ -89,7 +83,7 @@ export default function WebsitesListPage() {
         </a>
       ) 
     },
-    { header: 'Owner ID', accessor: 'ownerId' }, // Simple display for now
+    { header: 'Owner ID', accessor: 'ownerId' }, 
   ];
 
   return (

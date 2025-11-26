@@ -4,7 +4,7 @@ import { Sidebar } from '../../components/layout/Sidebar';
 import { TopBar } from '../../components/layout/TopBar';
 import { Loader } from '../../components/ui/Loader';
 import { Button } from '../../components/ui/Button';
-import { RecentScansList } from '../../components/widgets/RecentScansList'; // Reusing for the scans tab
+import { RecentScansList } from '../../components/widgets/RecentScansList'; 
 import { useFetch } from '../../hooks/useFetch';
 import { websitesApi } from '../../services/api/websitesApi';
 import { ArrowLeft, Play } from 'lucide-react';
@@ -33,7 +33,7 @@ export default function WebsiteDetailPage() {
       <div className="flex-1 flex flex-col overflow-hidden">
         <TopBar title={website.name} />
         <main className="flex-1 overflow-y-auto p-8">
-          {/* Header */}
+          {}
           <div className="mb-8 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link to="/websites">
@@ -49,7 +49,7 @@ export default function WebsiteDetailPage() {
             </Button>
           </div>
 
-          {/* Tabs */}
+          {}
           <div className="border-b border-slate-200 mb-6">
             <nav className="-mb-px flex space-x-8">
               {['overview', 'scans'].map((tab) => (
@@ -68,7 +68,7 @@ export default function WebsiteDetailPage() {
             </nav>
           </div>
 
-          {/* Content */}
+          {}
           {activeTab === 'overview' && (
             <div className="bg-white rounded-lg border border-slate-200 p-6">
               <h3 className="text-lg font-medium text-slate-900 mb-4">Details</h3>
@@ -91,9 +91,7 @@ export default function WebsiteDetailPage() {
 
           {activeTab === 'scans' && (
             <div>
-              {/* If your API returned a scan list inside the website object, we'd use it here. 
-                  For now, we'll display a placeholder or empty list since the API inventory didn't explicitly detail nested scans.
-                  In a real scenario, you'd fetch /websites/:id/scans */}
+              {}
               <RecentScansList scans={[]} loading={false} />
               <p className="mt-4 text-sm text-slate-500 text-center">
                 (Note: Nested scan list endpoint not explicitly defined in Inventory, using empty placeholder)
