@@ -1,6 +1,7 @@
-module.exports = {
-  info: (...args) => console.log(...args),
-  warn: (...args) => console.warn(...args),
-  error: (...args) => console.error(...args),
-  debug: (...args) => console.debug(...args),
+const logger = {
+  info: (...args) => console.log('[INFO]', ...args),
+  warn: (...args) => console.warn('[WARN]', ...args),
+  error: (...args) => console.error('[ERROR]', ...args),
 };
+
+module.exports = logger;

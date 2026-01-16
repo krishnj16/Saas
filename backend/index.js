@@ -535,6 +535,7 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const cookieParser = require("cookie-parser");
+const csrfMiddleware = require('./middleware/csrf.middleware');
 const http = require("http");
 const { v4: uuidv4 } = require("uuid");
 
@@ -590,7 +591,7 @@ function safeMount(app, basePath, routerObj) {
   }
 }
 
-const authRoutes = safeRequire("./routes/auth.routes");
+const authRoutes = require("./routes/auth.routes");
 const websitesRouter = safeRequire("./routes/website.routes");
 const findingsRouter = safeRequire("./routes/findings");
 const discoveryRoutes = safeRequire("./routes/discovery");
@@ -627,6 +628,7 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(csrfMiddleware);
 
 app.get("/health", (req, res) => res.json({ status: "ok" }));
 app.get("/__ping", (req, res) => res.json({ ok: true }));
