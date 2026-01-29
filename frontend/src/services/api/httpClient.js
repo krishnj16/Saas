@@ -2,9 +2,9 @@ import axios from 'axios';
 
 function getCookie(name) {
   if (typeof document === 'undefined') return undefined;
-  const match = document.cookie.split('; ').find((row) => row.startsWith(name + '='));
-  if (!match) return undefined;
-  return decodeURIComponent(match.split('=')[1]);
+  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+  if (match) return decodeURIComponent(match[2]);
+  return undefined;
 }
 
 const httpClient = axios.create({
@@ -13,17 +13,24 @@ const httpClient = axios.create({
   timeout: 30000,
 });
 
-httpClient.interceptors.request.use((config) => {
-  try {
-    const csrf = getCookie('csrfToken');
-    if (csrf) {
-      config.headers = config.headers || {};
-      config.headers['X-CSRF-Token'] = csrf;
+httpClient.interceptors.request.use(
+  (config) => {
+    const method = config.method?.toLowerCase();
+
+    // attach CSRF only for unsafe methods
+    if (['post', 'put', 'patch', 'delete'].includes(method)) {
+      const csrf = getCookie('csrf_token');
+
+      if (csrf) {
+        config.headers = config.headers || {};
+        config.headers['X-CSRF-Token'] = csrf; // MUST match backend
+      }
     }
-  } catch (err) {
-    console.error('CSRF read failed', err);
-  }
-  return config;
-}, (err) => Promise.reject(err));
+
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 
 export default httpClient;  
