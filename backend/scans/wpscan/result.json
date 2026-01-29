@@ -1,0 +1,158 @@
+{
+  "banner": {
+    "description": "WordPress Security Scanner by the WPScan Team",
+    "version": "3.8.28",
+    "authors": [
+      "@_WPScan_",
+      "@ethicalhack3r",
+      "@erwan_lr",
+      "@firefart"
+    ],
+    "sponsor": "Sponsored by Automattic - https://automattic.com/"
+  },
+  "start_time": 1759249864,
+  "start_memory": 48381952,
+  "target_url": "http://host.docker.internal:8080/",
+  "target_ip": "192.168.65.254",
+  "effective_url": "http://host.docker.internal:8080/",
+  "interesting_findings": [
+    {
+      "url": "http://host.docker.internal:8080/",
+      "to_s": "Headers",
+      "type": "headers",
+      "found_by": "Headers (Passive Detection)",
+      "confidence": 100,
+      "confirmed_by": {
+
+      },
+      "references": {
+
+      },
+      "interesting_entries": [
+        "Server: Apache/2.4.25 (Debian)",
+        "X-Powered-By: PHP/7.2.12"
+      ]
+    },
+    {
+      "url": "http://host.docker.internal:8080/xmlrpc.php",
+      "to_s": "XML-RPC seems to be enabled: http://host.docker.internal:8080/xmlrpc.php",
+      "type": "xmlrpc",
+      "found_by": "Direct Access (Aggressive Detection)",
+      "confidence": 100,
+      "confirmed_by": {
+
+      },
+      "references": {
+        "url": [
+          "http://codex.wordpress.org/XML-RPC_Pingback_API"
+        ],
+        "metasploit": [
+          "auxiliary/scanner/http/wordpress_ghost_scanner",
+          "auxiliary/dos/http/wordpress_xmlrpc_dos",
+          "auxiliary/scanner/http/wordpress_xmlrpc_login",
+          "auxiliary/scanner/http/wordpress_pingback_access"
+        ]
+      },
+      "interesting_entries": [
+
+      ]
+    },
+    {
+      "url": "http://host.docker.internal:8080/readme.html",
+      "to_s": "WordPress readme found: http://host.docker.internal:8080/readme.html",
+      "type": "readme",
+      "found_by": "Direct Access (Aggressive Detection)",
+      "confidence": 100,
+      "confirmed_by": {
+
+      },
+      "references": {
+
+      },
+      "interesting_entries": [
+
+      ]
+    },
+    {
+      "url": "http://host.docker.internal:8080/wp-cron.php",
+      "to_s": "The external WP-Cron seems to be enabled: http://host.docker.internal:8080/wp-cron.php",
+      "type": "wp_cron",
+      "found_by": "Direct Access (Aggressive Detection)",
+      "confidence": 60,
+      "confirmed_by": {
+
+      },
+      "references": {
+        "url": [
+          "https://www.iplocation.net/defend-wordpress-from-ddos",
+          "https://github.com/wpscanteam/wpscan/issues/1299"
+        ]
+      },
+      "interesting_entries": [
+
+      ]
+    }
+  ],
+  "version": {
+    "number": "4.9.8",
+    "release_date": "2018-08-02",
+    "status": "insecure",
+    "found_by": "Emoji Settings (Passive Detection)",
+    "confidence": 100,
+    "interesting_entries": [
+      "http://host.docker.internal:8080/, Match: 'wp-includes\\/js\\/wp-emoji-release.min.js?ver=4.9.8'"
+    ],
+    "confirmed_by": {
+      "Meta Generator (Passive Detection)": {
+        "confidence": 60,
+        "interesting_entries": [
+          "http://host.docker.internal:8080/, Match: 'WordPress 4.9.8'"
+        ]
+      }
+    },
+    "vulnerabilities": [
+
+    ]
+  },
+  "main_theme": null,
+  "plugins": {
+
+  },
+  "themes": {
+
+  },
+  "timthumbs": {
+
+  },
+  "users": {
+    "kj": {
+      "id": 1,
+      "found_by": "Author Id Brute Forcing - Author Pattern (Aggressive Detection)",
+      "confidence": 100,
+      "interesting_entries": [
+
+      ],
+      "confirmed_by": {
+        "Login Error Messages (Aggressive Detection)": {
+          "confidence": 100,
+          "interesting_entries": [
+
+          ]
+        }
+      }
+    }
+  },
+  "vuln_api": {
+    "error": "No WPScan API Token given, as a result vulnerability data has not been output.\nYou can get a free API token with 25 daily requests by registering at https://wpscan.com/register"
+  },
+  "stop_time": 1759249877,
+  "elapsed": 12,
+  "requests_done": 3271,
+  "cached_requests": 5,
+  "data_sent": 1001883,
+  "data_sent_humanised": "978.401 KB",
+  "data_received": 791332,
+  "data_received_humanised": "772.785 KB",
+  "used_memory": 305553408,
+  "used_memory_humanised": "291.398 MB"
+}

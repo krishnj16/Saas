@@ -1,0 +1,452 @@
+{
+  "users": [
+    {
+      "id": "eab6635e-bf11-4840-84a9-e3105903d158",
+      "email": "user@mail.com",
+      "password": "76e97544-c529-414f-81a0-cc2b99559552",
+      "created_at": "2025-10-13T09:29:18.147Z",
+      "failed_login_attempts": 0,
+      "locked_until": null
+    },
+    {
+      "id": "1f48a605-9516-435f-88d3-88fedf7874af",
+      "email": "kj@email.com",
+      "password": "7629b171-84f6-44c8-a006-a5f25d60b914",
+      "created_at": "2025-10-13T09:29:18.147Z",
+      "failed_login_attempts": 0,
+      "locked_until": null
+    },
+    {
+      "id": "4f3466e4-1ad2-49ae-aba2-da0c4cfcba11",
+      "email": "testuser@email.com",
+      "password": "8bdcd80a-937a-4a77-9119-26d69eff08ca",
+      "created_at": "2025-10-13T09:29:18.147Z",
+      "failed_login_attempts": 0,
+      "locked_until": null
+    },
+    {
+      "id": "8f693e05-0a0d-4b9e-92e6-e3b2937ba03d",
+      "email": "user1@example.com",
+      "password": "7d734e7e-5aa8-438c-bedc-2b3b91e8b6fe",
+      "created_at": "2025-10-13T09:29:18.147Z",
+      "failed_login_attempts": 0,
+      "locked_until": null
+    },
+    {
+      "id": "2ea42ec8-225b-4517-8639-3652b0c06c3f",
+      "email": "alice2@example.com",
+      "password": "8e5d4546-587b-4caf-8f36-c29783f7e7e1",
+      "created_at": "2025-10-13T09:29:18.147Z",
+      "failed_login_attempts": 0,
+      "locked_until": null
+    },
+    {
+      "id": "d573b3c8-16dd-42e7-a9d5-690b69d215b1",
+      "email": "kjemail",
+      "password": "80a9559f5296ffe7531bf166d1e7b06c",
+      "created_at": "2025-10-13T10:09:46.309Z",
+      "failed_login_attempts": 0,
+      "locked_until": null
+    },
+    {
+      "id": "1741c080-e2fb-413c-866d-d5ef19cb447f",
+      "email": "newuser@example.com",
+      "password": "$2b$12$Dh0c8DbdSClnGh6zZPzYVeFKxYXLv2ZEQ06tKJ6UW1cTLtd5Hk3Y.",
+      "created_at": "2025-10-24T17:42:38.523Z",
+      "failed_login_attempts": 0,
+      "locked_until": null
+    },
+    {
+      "id": "8f52a722-c400-4da7-a102-73449601a7e8",
+      "email": "test@example.com",
+      "password": "$2b$12$EZlAVv5C4yXzVRekEi1YzuZQt3xFJpNsUeU2ddR0Y5Ix3eWyQYEGW",
+      "created_at": "2025-10-24T17:35:50.544Z",
+      "failed_login_attempts": 0,
+      "locked_until": null
+    }
+  ],
+  "user_refresh_tokens": [
+    {
+      "id": "1",
+      "user_id": "8f52a722-c400-4da7-a102-73449601a7e8",
+      "token_hash": "$2b$12$LpB/uvMZkFxdUAwOsDgXSubDXrNSvBX1wsZR/dKY2JyyfcVJvUuJK",
+      "issued_at": "2025-10-24T17:42:46.870Z",
+      "expires_at": "2025-11-23T17:42:46.870Z",
+      "last_used_at": "2025-10-24T17:42:56.964Z",
+      "device_info": null,
+      "revoked": true
+    },
+    {
+      "id": "2",
+      "user_id": "8f52a722-c400-4da7-a102-73449601a7e8",
+      "token_hash": "$2b$12$lW2SNQ8saTYswDSbE.wBM.LOluSwvVDVZG459lTIZ/gEniYxMKg1q",
+      "issued_at": "2025-10-24T17:42:57.385Z",
+      "expires_at": "2025-11-23T17:42:57.385Z",
+      "last_used_at": null,
+      "device_info": null,
+      "revoked": false
+    },
+    {
+      "id": "3",
+      "user_id": "8f52a722-c400-4da7-a102-73449601a7e8",
+      "token_hash": "$2b$12$silJ.jpUZGnCeKKPUUTImOL7N27ZqZNDqnNMHVhfE5Aj6IjOiwpPC",
+      "issued_at": "2025-10-24T17:45:44.807Z",
+      "expires_at": "2025-11-23T17:45:44.807Z",
+      "last_used_at": "2025-10-24T17:45:58.852Z",
+      "device_info": null,
+      "revoked": true
+    },
+    {
+      "id": "4",
+      "user_id": "8f52a722-c400-4da7-a102-73449601a7e8",
+      "token_hash": "$2b$12$ZtCEd2sfCcifIP4tML7y0.JUfaOLSdpFeVeWv4d6B6bmwmNqd0PWS",
+      "issued_at": "2025-10-24T17:45:59.187Z",
+      "expires_at": "2025-11-23T17:45:59.187Z",
+      "last_used_at": "2025-10-24T17:51:34.984Z",
+      "device_info": null,
+      "revoked": true
+    },
+    {
+      "id": "5",
+      "user_id": "8f52a722-c400-4da7-a102-73449601a7e8",
+      "token_hash": "$2b$12$nssq27HLcxpG2TYbjxgGru8OktLF/DfBNFO0M1zSinX3EfPmMEqOi",
+      "issued_at": "2025-10-24T17:51:35.307Z",
+      "expires_at": "2025-11-23T17:51:35.307Z",
+      "last_used_at": null,
+      "device_info": null,
+      "revoked": false
+    },
+    {
+      "id": "6",
+      "user_id": "8f52a722-c400-4da7-a102-73449601a7e8",
+      "token_hash": "$2b$12$jyFzwkEDQfdQ94VWsTQnau/o9p.SJ.UFD0edYagAdKltaKZPpOl6u",
+      "issued_at": "2025-10-24T18:00:16.707Z",
+      "expires_at": "2025-11-23T18:00:16.707Z",
+      "last_used_at": null,
+      "device_info": null,
+      "revoked": false
+    }
+  ],
+  "websites": [
+    {
+      "id": "279a8498-7cdf-4270-8d93-c662071b2946",
+      "url": "https://example.com",
+      "created_at": "2025-09-29T11:03:05.250Z",
+      "last_scan_at": null,
+      "active": true,
+      "owner_id": "d573b3c8-16dd-42e7-a9d5-690b69d215b1",
+      "deleted_at": "2025-09-29T15:22:31.036Z"
+    },
+    {
+      "id": "757616cf-5f4e-424a-92c5-f5b93c2fe757",
+      "url": "https://test-check.example",
+      "created_at": "2025-09-29T15:38:29.845Z",
+      "last_scan_at": null,
+      "active": true,
+      "owner_id": "d573b3c8-16dd-42e7-a9d5-690b69d215b1",
+      "deleted_at": null
+    },
+    {
+      "id": "91293d83-ae1e-474c-9168-51da2cb43d04",
+      "url": "https://example-for-scan.test",
+      "created_at": "2025-09-29T18:49:47.513Z",
+      "last_scan_at": null,
+      "active": true,
+      "owner_id": "d573b3c8-16dd-42e7-a9d5-690b69d215b1",
+      "deleted_at": null
+    },
+    {
+      "id": "80331fc3-0365-4188-89f6-01a9d3903f21",
+      "url": "https://example.com",
+      "created_at": "2025-09-29T09:24:12.595Z",
+      "last_scan_at": "2025-10-06T16:53:11.354Z",
+      "active": true,
+      "owner_id": "d573b3c8-16dd-42e7-a9d5-690b69d215b1",
+      "deleted_at": null
+    }
+  ],
+  "scan_outputs": [
+    {
+      "id": 1,
+      "scanner_name": "wpscan",
+      "raw_json": {
+        "plugins": {
+          "example-plugin": {
+            "version": "1.2.3",
+            "vulnerabilities": [
+              {
+                "path": "/wp-content/plugins/example-plugin/vuln.php",
+                "title": "Fake XSS",
+                "evidence": "<script>1</script>",
+                "severity": "high",
+                "parameter": "q",
+                "description": "Fake description"
+              }
+            ]
+          }
+        }
+      },
+      "created_at": "2025-10-05T18:03:50.094Z",
+      "scan_task_id": "7e8fdc68-1f2e-4e3f-9445-32c33a318895",
+      "s3_url": null
+    },
+    {
+      "id": 2,
+      "scanner_name": "wpscan",
+      "raw_json": {
+        "plugins": {
+          "example-plugin": {
+            "version": "1.2.3",
+            "vulnerabilities": [
+              {
+                "path": "/wp-content/plugins/example-plugin/vuln.php",
+                "title": "Fake XSS",
+                "evidence": "<script>1</script>",
+                "severity": "high",
+                "parameter": "q",
+                "description": "Fake description"
+              }
+            ]
+          }
+        }
+      },
+      "created_at": "2025-10-05T18:05:48.329Z",
+      "scan_task_id": "bd5c0d84-fb41-45c0-b00b-2b23af11d3b9",
+      "s3_url": null
+    },
+    {
+      "id": 3,
+      "scanner_name": "wpscan",
+      "raw_json": {
+        "plugins": {
+          "example-plugin": {
+            "version": "1.2.3",
+            "vulnerabilities": [
+              {
+                "path": "/wp-content/plugins/example-plugin/vuln.php",
+                "title": "Fake XSS",
+                "evidence": "<script>1</script>",
+                "severity": "high",
+                "parameter": "q",
+                "description": "Fake description"
+              }
+            ]
+          }
+        }
+      },
+      "created_at": "2025-10-05T18:08:34.670Z",
+      "scan_task_id": "bccdf647-60b0-45b2-8d48-7fc4318778f6",
+      "s3_url": null
+    },
+    {
+      "id": 4,
+      "scanner_name": "wpscan",
+      "raw_json": {
+        "plugins": {
+          "example-plugin": {
+            "version": "1.2.3",
+            "vulnerabilities": [
+              {
+                "path": "/wp-content/plugins/example-plugin/vuln.php",
+                "title": "Fake XSS",
+                "evidence": "<script>1</script>",
+                "severity": "high",
+                "parameter": "q",
+                "description": "Fake description"
+              }
+            ]
+          }
+        }
+      },
+      "created_at": "2025-10-05T18:12:04.740Z",
+      "scan_task_id": "8a3a4982-f824-4154-9ac2-f8f0c1cc96af",
+      "s3_url": null
+    },
+    {
+      "id": 5,
+      "scanner_name": "wpscan",
+      "raw_json": {
+        "plugins": {
+          "example-plugin": {
+            "version": "1.2.3",
+            "vulnerabilities": [
+              {
+                "path": "/wp-content/plugins/example-plugin/vuln.php",
+                "title": "Fake XSS",
+                "evidence": "<script>alert(1)</script>",
+                "severity": "high",
+                "parameter": "q",
+                "description": "Fake description — schema-aware smoke test"
+              }
+            ]
+          }
+        }
+      },
+      "created_at": "2025-10-05T18:19:15.331Z",
+      "scan_task_id": "188a3177-bd01-465b-9a36-9b694b0f8b9e",
+      "s3_url": null
+    },
+    {
+      "id": 6,
+      "scanner_name": "wpscan",
+      "raw_json": {
+        "plugins": {
+          "example-plugin": {
+            "version": "1.2.3",
+            "vulnerabilities": [
+              {
+                "path": "/wp-content/plugins/example-plugin/vuln.php",
+                "title": "Fake XSS",
+                "evidence": "<script>alert(1)</script>",
+                "severity": "high",
+                "parameter": "q",
+                "description": "Fake description — schema-aware smoke test"
+              }
+            ]
+          }
+        }
+      },
+      "created_at": "2025-10-05T18:29:37.552Z",
+      "scan_task_id": "5c1b9c8d-8147-4307-9b5b-9fe3bd63df01",
+      "s3_url": null
+    },
+    {
+      "id": 7,
+      "scanner_name": "wpscan",
+      "raw_json": {
+        "plugins": {
+          "example-plugin": {
+            "version": "1.2.3",
+            "vulnerabilities": [
+              {
+                "path": "/wp-content/plugins/example-plugin/vuln.php",
+                "title": "Fake XSS",
+                "evidence": "<script>alert(1)</script>",
+                "severity": "high",
+                "parameter": "q",
+                "description": "Testing unified parser after JSON fixes"
+              }
+            ]
+          }
+        }
+      },
+      "created_at": "2025-10-05T18:36:17.225Z",
+      "scan_task_id": "e1ca6fbf-f3ab-407f-99fc-7f1cc1029a67",
+      "s3_url": null
+    },
+    {
+      "id": 8,
+      "scanner_name": "wpscan",
+      "raw_json": {
+        "plugins": {
+          "example-plugin": {
+            "version": "1.2.3",
+            "vulnerabilities": [
+              {
+                "path": "/wp-content/plugins/example-plugin/vuln.php",
+                "title": "Fake XSS",
+                "evidence": "<script>alert(1)</script>",
+                "severity": "high",
+                "parameter": "q",
+                "description": "Testing unified parser after JSON fixes"
+              }
+            ]
+          }
+        }
+      },
+      "created_at": "2025-10-05T18:39:00.985Z",
+      "scan_task_id": "8a5d29f4-29c2-4229-a75e-7a68e422f76a",
+      "s3_url": null
+    },
+    {
+      "id": 9,
+      "scanner_name": "wpscan",
+      "raw_json": {
+        "plugins": {
+          "example-plugin": {
+            "version": "1.2.3",
+            "vulnerabilities": [
+              {
+                "path": "/wp-content/plugins/example-plugin/vuln.php",
+                "title": "Fake XSS",
+                "evidence": "<script>alert(1)</script>",
+                "severity": "high",
+                "parameter": "q",
+                "description": "Testing unified parser after JSON fixes"
+              }
+            ]
+          }
+        }
+      },
+      "created_at": "2025-10-05T18:43:03.980Z",
+      "scan_task_id": "f6347a12-d207-46a0-84e5-e4208f266f05",
+      "s3_url": null
+    },
+    {
+      "id": 10,
+      "scanner_name": "wpscan",
+      "raw_json": {
+        "plugins": {
+          "example-plugin": {
+            "version": "1.2.3",
+            "vulnerabilities": [
+              {
+                "path": "/wp-content/plugins/example-plugin/vuln.php",
+                "title": "Fake XSS",
+                "evidence": "<script>alert(1)</script>",
+                "severity": "high",
+                "parameter": "q",
+                "description": "Testing unified parser after JSON fixes"
+              }
+            ]
+          }
+        }
+      },
+      "created_at": "2025-10-05T18:44:41.787Z",
+      "scan_task_id": "6ba184d1-35c3-44a7-9002-c43e5e2ac43d",
+      "s3_url": null
+    },
+    {
+      "id": 11,
+      "scanner_name": "wpscan",
+      "raw_json": {
+        "plugins": {
+          "example-plugin": {
+            "version": "1.2.3",
+            "vulnerabilities": [
+              {
+                "path": "/wp-content/plugins/example-plugin/vuln.php",
+                "title": "Fake XSS",
+                "evidence": "<script>alert(1)</script>",
+                "severity": "high",
+                "parameter": "q",
+                "description": "Testing unified parser after JSON fixes"
+              }
+            ]
+          }
+        }
+      },
+      "created_at": "2025-10-05T18:48:54.677Z",
+      "scan_task_id": "34626ce7-eee4-4134-9423-d888a05796b1",
+      "s3_url": null
+    }
+  ],
+  "notifications": [
+    {
+      "id": "fd209738-8e7f-4a89-b476-28b9edf22f38",
+      "user_id": "e4a1a3c8-7203-4b49-8232-c133bdd1137e",
+      "scan_task_id": null,
+      "message": null,
+      "severity": "high",
+      "read_at": null,
+      "created_at": "2025-10-23T08:24:50.570Z",
+      "site_id": "6666",
+      "type": "vuln",
+      "title": "worker create test",
+      "body": "should be created",
+      "metadata": {},
+      "is_read": false,
+      "email_sent": false
+    }
+  ]
+}

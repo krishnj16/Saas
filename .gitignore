@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Node modules
 node_modules/
 
@@ -23,3 +24,6 @@ coverage/
 .DS_Store
 Thumbs.db
 .env.bak
+=======
+node_modules
+>>>>>>> 1132d6c347dcf07001bb70ab7d8f1bb916b1d572

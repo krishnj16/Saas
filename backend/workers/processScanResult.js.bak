@@ -1,0 +1,75 @@
+// backend/worker/processScanResult.js
+const { pool } = require('../db/pgPool');
+const { parseWpscan } = require('../parsers/parseWpscan');
+const { parseWapiti } = require('../parsers/parseWapiti');
+
+/**
+ * processScanResult({ scanTaskId, scannerName, rawJson })
+ * - rawJson: JS object (already parsed)
+ * - inserts unified vulnerabilities into vulnerabilities table inside a transaction
+ */
+async function persistVulnerability(client, scanTaskId, vuln) {
+  const q = `INSERT INTO vulnerabilities
+    (scan_task_id, scanner, type, severity, title, description, path, parameter, evidence, raw_json)
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`;
+  const values = [
+    scanTaskId,
+    vuln.scanner,
+    vuln.type,
+    vuln.severity,
+    vuln.title,
+    vuln.description,
+    vuln.path,
+    vuln.parameter,
+    vuln.evidence,
+    vuln.raw || {},
+  ];
+  const res = await client.query(q, values);
+  return res.rows[0];
+}
+
+async function processScanResult({ scanTaskId, scannerName, rawJson }) {
+  let vulns = [];
+  if (scannerName === 'wpscan') vulns = parseWpscan(rawJson);
+  else if (scannerName === 'wapiti') vulns = parseWapiti(rawJson);
+  else {
+    // fallback: try generic 'vulnerabilities' key
+    const fallback = rawJson && rawJson.vulnerabilities;
+    if (Array.isArray(fallback)) {
+      vulns = fallback.map(v => ({
+        scanner: scannerName,
+        type: v.type || 'other',
+        severity: v.severity || 'low',
+        title: v.title || v.name || 'vuln',
+        description: v.description || '',
+        path: v.path || null,
+        parameter: v.parameter || null,
+        evidence: v.evidence || '',
+        raw: v,
+      }));
+    } else {
+      vulns = [];
+    }
+  }
+
+  if (!vulns.length) return [];
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const inserted = [];
+    for (const v of vulns) {
+      const row = await persistVulnerability(client, scanTaskId, v);
+      inserted.push(row);
+    }
+    await client.query('COMMIT');
+    return inserted;
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
+module.exports = { processScanResult };
