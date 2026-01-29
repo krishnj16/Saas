@@ -1,0 +1,61 @@
+// backend/middleware/csrfDoubleSubmit.js
+// Defensive CSRF double-submit middleware.
+// Works whether mounted as app.use(csrfDoubleSubmit) or app.use(csrfDoubleSubmit()).
+
+const logger = (() => {
+  try { return require('../services/logger'); } catch (e) { return console; }
+})();
+
+function createMiddleware() {
+  return function csrfMiddleware(req, res, next) {
+    try {
+      // Defensive: if req/res are missing, attempt to call next or return
+      if (!req || !res) {
+        if (typeof next === 'function') return next();
+        return;
+      }
+
+      // Allow safe methods
+      const safeMethods = ['GET', 'HEAD', 'OPTIONS'];
+      if (safeMethods.includes(String(req.method).toUpperCase())) return next();
+
+      // Permit auth-related endpoints (covers cases like /api/auth/login, /api/login, /api/auth/signup)
+      const path = String(req.path || req.url || '').toLowerCase();
+      if (path.includes('/auth') || path.includes('/login') || path.includes('/signup')) return next();
+
+      // Header token vs cookie token
+      const header = req.get && (req.get('x-csrf-token') || req.get('x-xsrf-token') || req.get('csrf-token'));
+      const cookieToken = (req.cookies && req.cookies.csrfToken) || (req.get && req.get('csrf-token'));
+
+      if (!header || !cookieToken) {
+        return res.status(403).json({ error: 'csrf_missing' });
+      }
+      if (String(header) !== String(cookieToken)) {
+        return res.status(403).json({ error: 'csrf_mismatch' });
+      }
+      return next();
+    } catch (err) {
+      try {
+        if (logger && typeof logger.error === 'function') logger.error('csrf_middleware_error', { err: err.stack || String(err) });
+      } catch (e) { /* ignore */ }
+
+      // Best-effort: respond 403 via res if available, otherwise call next
+      try {
+        if (res && typeof res.status === 'function') return res.status(403).json({ error: 'csrf_error' });
+      } catch (e) { /* ignore */ }
+
+      if (typeof next === 'function') return next();
+    }
+  };
+}
+
+// Export supports both direct middleware call and factory usage
+module.exports = function csrfDoubleSubmit(...args) {
+  if (args.length === 3) {
+    // Called directly as middleware: (req, res, next)
+    const [req, res, next] = args;
+    return createMiddleware()(req, res, next);
+  }
+  // Otherwise return middleware factory
+  return createMiddleware();
+};
